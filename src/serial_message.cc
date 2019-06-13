@@ -7,7 +7,9 @@
 namespace furgbol {
 namespace joystick {
 
-SerialMessage::SerialMessage() {}
+SerialMessage::SerialMessage() {
+    clear();
+}
 
 SerialMessage::SerialMessage(uint16_t pkg_id, uint8_t msg_type, uint8_t robot_id, uint8_t *wheels_vel, uint8_t dribbler, uint8_t kick) {
     pkg_id_ = pkg_id;
@@ -24,15 +26,7 @@ SerialMessage::SerialMessage(uint16_t pkg_id, uint8_t msg_type, uint8_t robot_id
 SerialMessage::~SerialMessage() {}
 
 void SerialMessage::serialize(std::vector<unsigned char> &buffer) {
-    /*std::cout<<"=========================PACOTE====================================\n"<<std::endl;
-    printf("%u\n",robot_id_);
-    printf("%u\n",wheels_vel_[0]);
-    printf("%u\n",wheels_vel_[1]);
-    printf("%u\n",wheels_vel_[2]);
-    printf("%u\n",wheels_vel_[3]);
-    printf("%u\n",dribbler_);
-    printf("%u\n",kick_);*/
-    buffer[ROBOT_ID] = robot_id_;
+    buffer[ROBOT_ID] = robot_id_+128;
     buffer[VEL_WHEEL_ONE] = wheels_vel_[0];
     buffer[VEL_WHEEL_TWO] = wheels_vel_[1];
     buffer[VEL_WHEEL_THREE] = wheels_vel_[2];
@@ -41,6 +35,17 @@ void SerialMessage::serialize(std::vector<unsigned char> &buffer) {
     buffer[DIRECTION] = wheels_dir_[3] << 3 | wheels_dir_[2] << 2 | wheels_dir_[1] << 1 | wheels_dir_[0];
     buffer[DRIBBLER] = dribbler_;
     buffer[KICK] = kick_;
+
+    std::cout<<"=========================PACOTE====================================\n"<<std::endl;
+    printf("%u\n",buffer[0]);
+    printf("%u\n",buffer[1]);
+    printf("%u\n",buffer[2]);
+    printf("%u\n",buffer[3]);
+    printf("%u\n",buffer[4]);
+    printf("%u\n",buffer[5]);
+    printf("%u\n",buffer[6]);
+    printf("%u\n",buffer[7]);
+
 }
 
 void SerialMessage::clear() {
