@@ -23,17 +23,84 @@ SerialMessage::SerialMessage(uint16_t pkg_id, uint8_t msg_type, uint8_t robot_id
 
 SerialMessage::~SerialMessage() {}
 
-void SerialMessage::serialize(char *buffer) {
-    buffer[PKG_ID_FIRST] = (char)(pkg_id_ >> 8) | 0;
-    buffer[PKG_ID_SECOND] = (char)pkg_id_ | 0;
-    buffer[MSG_TYPE] = (char)msg_type_;
-    buffer[ROBOT_ID] = (char)robot_id_;
-    buffer[VEL_WHEEL_ONE] = (char)wheels_vel_[VEL_WHEEL_ONE];
-    buffer[VEL_WHEEL_TWO] = (char)wheels_vel_[VEL_WHEEL_TWO];
-    buffer[VEL_WHEEL_THREE] = (char)wheels_vel_[VEL_WHEEL_THREE];
-    buffer[VEL_WHEEL_FOUR] = (char)wheels_vel_[VEL_WHEEL_FOUR];
-    buffer[DRIBBLER] = (char)dribbler_;
-    buffer[KICK] = (char)kick_;
+void SerialMessage::serialize(std::vector<unsigned char> &buffer) {
+    /*std::cout<<"=========================PACOTE====================================\n"<<std::endl;
+    printf("%u\n",robot_id_);
+    printf("%u\n",wheels_vel_[0]);
+    printf("%u\n",wheels_vel_[1]);
+    printf("%u\n",wheels_vel_[2]);
+    printf("%u\n",wheels_vel_[3]);
+    printf("%u\n",dribbler_);
+    printf("%u\n",kick_);*/
+    buffer[ROBOT_ID] = robot_id_;
+    buffer[VEL_WHEEL_ONE] = wheels_vel_[0];
+    buffer[VEL_WHEEL_TWO] = wheels_vel_[1];
+    buffer[VEL_WHEEL_THREE] = wheels_vel_[2];
+    buffer[VEL_WHEEL_FOUR] = wheels_vel_[3];
+    buffer[DIRECTION] = 0;
+    buffer[DIRECTION] = wheels_dir_[3] << 3 | wheels_dir_[2] << 2 | wheels_dir_[1] << 1 | wheels_dir_[0];
+    buffer[DRIBBLER] = dribbler_;
+    buffer[KICK] = kick_;
+}
+
+void SerialMessage::clear() {
+    pkg_id_ = 0;
+    msg_type_ = 0;
+    robot_id_ = 0;
+    wheels_vel_[0] = 0;
+    wheels_vel_[1] = 0;
+    wheels_vel_[2] = 0;
+    wheels_vel_[3] = 0;
+    dribbler_ = 0;
+    kick_ = 0;
+}
+
+std::ostream &operator << (std::ostream &stream, furgbol::joystick::SerialMessage const &message)
+{
+    stream << "TeamProcolMessage{ " << std::endl;
+    stream << "\tid: " << static_cast<int>(message.robot_id_) << std::endl;
+    stream << "\twheels_velocity: [ ";
+    stream << static_cast<int>(message.wheels_vel_[0]) << ", ";
+    stream << static_cast<int>(message.wheels_vel_[1]) << ", ";
+    stream << static_cast<int>(message.wheels_vel_[2]) << ", ";
+    stream << static_cast<int>(message.wheels_vel_[3]);
+    stream << "]" << std::endl;
+    stream << "\twheels_direction: [ ";
+    stream << static_cast<int>(message.wheels_dir_[0]) << ", ";
+    stream << static_cast<int>(message.wheels_dir_[1]) << ", ";
+    stream << static_cast<int>(message.wheels_dir_[2]) << ", ";
+    stream << static_cast<int>(message.wheels_dir_[3]);
+    stream << "]" << std::endl;
+    stream << "\tdribbler: " << static_cast<int>(message.dribbler_) << std::endl;
+    stream << "\tkick: " << static_cast<int>(message.kick_) << std::endl;
+    stream << "};";
+    return stream;
+}
+
+void SerialMessage::setRobotId(uint8_t robot_id) {
+    robot_id_ = robot_id;
+}
+
+void SerialMessage::setWheelsVel(uint8_t* wheels_vel) {
+    wheels_vel_[0] = wheels_vel[0];
+    wheels_vel_[1] = wheels_vel[1];
+    wheels_vel_[2] = wheels_vel[2];
+    wheels_vel_[3] = wheels_vel[3];
+}
+
+void SerialMessage::setWheelsDir(uint8_t* wheels_dir) {
+    wheels_dir_[0] = wheels_dir[0];
+    wheels_dir_[1] = wheels_dir[1];
+    wheels_dir_[2] = wheels_dir[2];
+    wheels_dir_[3] = wheels_dir[3];
+}
+
+void SerialMessage::setDribbler(uint8_t dribbler) {
+    dribbler_ = dribbler;
+}
+
+void SerialMessage::setKick(uint8_t kick) {
+    kick_ = kick;
 }
 
 uint16_t SerialMessage::getPkgId() {
@@ -50,6 +117,10 @@ uint8_t SerialMessage::getRobotId() {
 
 uint8_t *SerialMessage::getWheelsVel() {
     return wheels_vel_;
+}
+
+uint8_t *SerialMessage::getWheelsDir() {
+    return wheels_dir_;
 }
 
 uint8_t SerialMessage::getDribbler() {
