@@ -12,7 +12,7 @@ ManualControl::ManualControl(): device_n(-1), max_velocity(0), max_ang_velocity(
     initKinematicModel();
 }
 ManualControl::ManualControl(int _device_n, SerialSender *_serial): device_n(_device_n),
-    max_velocity(1.5), max_ang_velocity(10.0), running(false), rotating(false), dribbling(false), kicking(0), serial(_serial), bonus_velocity(0)
+    max_velocity(0.1), max_ang_velocity(5.0), running(false), rotating(false), dribbling(false), kicking(0), serial(_serial), bonus_velocity(0)
 {
     joystick = new Joystick(_device_n);
 
@@ -246,8 +246,8 @@ void ManualControl::calculateWheelsVelocity()
     Direction direction;
     for(int i = 0 ; i<4 ; i++){
         percentual_velocity[i] = (unsigned char)fabs(velocity_wheels[i][0]);
-        percentual_velocity[i] = percentual_velocity[i]>127 ? 127 : percentual_velocity[i];
-        direction = velocity_wheels[i][0]>0 ? COUNTERCLOCKWISE : CLOCKWISE;
+        percentual_velocity[i] = percentual_velocity[i]>127 ? 127: percentual_velocity[i];
+        direction = velocity_wheels[i][0]>0 ? CLOCKWISE : COUNTERCLOCKWISE;
         directions[i] = direction;
     }
     message.setWheelsVel(percentual_velocity);
