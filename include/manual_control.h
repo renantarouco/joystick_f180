@@ -1,7 +1,14 @@
 // Copyright 2019 FURGBot
 
-#ifndef MANUALCONTROL_H
-#define MANUALCONTROL_H
+#ifndef MANUAL_CONTROL_H
+#define MANUAL_CONTROL_H
+
+#include "serial_message.h"
+#include "serial_sender.h"
+#include "parameters.h"
+
+#include "joystick.hh"
+
 #include <iostream>
 #include <string>
 #include <vector>
@@ -9,113 +16,103 @@
 #include <mutex>
 #include <cstdio>
 
-#include <opencv/cv.h>
-
-#include "joystick.hh"
-
-#include "serial_message.h"
-#include "serial_sender.h"
-
-#define MIN_AXIS 10000
-#define MAX_AXIS 32767
-#define KICK_TIMES 10
-
 using namespace std;
-using namespace cv;
 using namespace furgbol::joystick;
+using namespace furgbol::parameters;
 
-enum Direction{
-    CLOCKWISE, COUNTERCLOCKWISE
+enum Axis{
+    AXIS_X, AXIS_Y
+};
+
+enum Buttons {
+    A, B, X, Y, LB, RB, LT, RT
 };
 
 /*!
  * \brief A classe ManualControl administra uma thread para fazer leitura do joystick, montagem do pacote serial
  * e adição na lista para envio da thread SerialCommunicator
  */
-class ManualControl
-{
-private:
-    bool running; //!<Flag de controle de execução da Thread
-    thread td; //!<Thread da classe
-    mutex mu; //!<Mutex para escrita na flag running
+class ManualControl {
+    private:
+        //Variáveis de thread
+        bool running_; //!<Flag de controle de execução da Thread
+        thread td_; //!<Thread da classe
+        mutex mu_; //!<Mutex para escrita na flag running
 
-    int device_n; //!<Número do joystick utilizado pela thread
-    Joystick *joystick; //!<Objeto da classe Joystick para fazer leitura do arquivo em que o joystick escreve seus dados
-    JoystickEvent event; //!<Objeto da classe JoystickEvent para verificar se houve algum evento no joystick que deve ser processado
-    vector<short> axis; //!<Vetor que guarda o valor dos analógicos do joystick
+        //Variáveis do joystick
+        int device_number_; //!<Número do joystick utilizado pela thread
+        Joystick *joystick_; //!<Objeto da classe Joystick para fazer leitura do arquivo em que o joystick escreve seus dados
+        JoystickEvent event_; //!<Objeto da classe JoystickEvent para verificar se houve algum evento no joystick que deve ser processado
+        vector<short> axis_; //!<Vetor que guarda o valor dos analógicos do joystick
 
-    float max_velocity; //!<Velocidade linear máxima que o robô pode assumir (0 - 1,5)
-    float max_ang_velocity; //!<Velocidade angular máxima que o robô pode assumir (0 - 10)
-    int dribbler_velocity; //!<Velocidade do dribbler em valor de pwm (0 - 127)
-    int kick_power; //!<Força do chute em pwm (0 - 127)
-    int pass_power; //!<Força do passe em pwm (0 - 127)
-    Mat_<float> velocity; //!<Matriz (3,1) de velocidade do robô [Vx, Vy, Vo]
-    Mat_<float> M; //!<Matriz (4,3) de modelo cinemático do robô para distribuir a velocidade para as quatro rodas
-    Mat_<float> R; //!<Matriz (3,3) de rotação utilizada para acertar as coordenadas do robô com as do joystick (y+ como frente do robô)
-    float robot_angle; //!<Angulo necessário em radianos para utilizar na matriz R (Pi/2)
-    Mat_<float> velocity_wheels; //!<Matriz (4,1) de velocidade das rodas do robô
-    bool rotating; //!<Flag para indicar se o botão de rotação está pressionado ou não
-    bool dribbling; //!<Flag para indicar se o botão de dribbler está pressionado ou não
-    int kicking; //!<Variável para garantir que o robô vai tentar chutar KICK_TIMES para facilitar o chute na hora de controlar
-    float bonus_velocity; //!<Variável para dar um boost de velocidade quando clicar no botão
+        //Variáveis de controle
+        int robot_id_; //!<Variável que guarda o id do robô que vai ser controlado
+        bool rotating_; //!<Flag para indicar se o botão de rotação está pressionado ou não
+        bool dribbling_; //!<Flag para indicar se o botão de dribbler está pressionado ou não
+        int kicking_; //!<Variável para garantir que o robô vai tentar chutar kick_times_ para facilitar o chute na hora de controlar
+        int linear_velocity_x_; //!<Variável que guarda a velocidade linear em x
+        int linear_velocity_y_; //!<Variável que guarda a velocidade linear em y
+        int angular_velocity_; //!<Variável que guarda a velocidade angular
+        int direction_x_; //!<Variável que guarda a direção da velocidade linear em x
+        int direction_y_; //!<Variável que guarda a direção da velocidade linear em y
+        int direction_theta_; //!<Variável que guarda a direção da velocidade angular
 
-    SerialMessage message; //!<Mensagem que será envidada
-    SerialSender *serial; //!<Ponteiro para a thread de comunicação serial
+        //Parâmetros
+        int max_linear_velocity_; //!<Velocidade linear máxima que o robô pode assumir
+        int max_angular_velocity_; //!<Velocidade angular máxima que o robô pode assumir
+        int bonus_linear_velocity_; //!<Variável para dar um boost de velocidade quando clicar no botão
+        int dribbler_velocity_; //!<Velocidade do dribbler pwm
+        int kick_power_; //!<Força do chute em pwm
+        int pass_power_; //!<Força do passe em pwm
+        int max_axis_; //!<Variável para armazenar o valor máximo lido pelo axis
+        int min_axis_; //!<Variável para armazenar o valor mínimo lido pelo axis
+        int kick_times_; //!<Variável para armazenar o número de vezes que o robô vai tentar chutar
 
-    /*!
-     * \brief initKinematicModel inicia a matriz M criando o modelo cinemático do robô
-     */
-    void initKinematicModel();
-    /*!
-     * \brief calculateVelocity calcula a velocidade linear do robô com base no valor oferecido pelo vetor axis
-     */
-    void calculateVelocity();
-    /*!
-     * \brief calculateWheelsVelocity utiliza as matrizes velocity, M e R para calcular a velocity_wheels
-     */
-    void calculateWheelsVelocity();
+        //Networking
+        SerialMessage message_; //!<Mensagem que será envidada
+        SerialSender *serial_; //!<Ponteiro para a thread de comunicação serial
 
-    /*!
-     * \brief readEventButton processa um evento que seja disparado por um botão, verificando que tipo de ação se deve tomar
-     * \return booleano indicando se há ou não a necessidade de enviar um dado para o robô
-     */
-    bool readEventButton();
-    /*!
-     * \brief readEventAxis processa um evento que seja disparado por um analógico, preenchendo o vetor axis
-     */
-    void readEventAxis();
-    /*!
-     * \brief verifyVelocityAxis verifica se os valores que estão no vetor de axis são suficientes para calcular a velocidade
-     * \return booleano indicando se o dado é ou não relevante
-     */
-    bool verifyVelocityAxis();
+        /*!
+        * \brief calculateVelocity calcula a velocidade linear do robô com base no valor oferecido pelo vetor axis
+        */
+        void calculateVelocity();
 
-    /*!
-     * \brief run é o loop principal a thread, passado por parâmetro para td
-     */
-    void run();
+        /*!
+        * \brief readEventButton processa um evento que seja disparado por um botão, verificando que tipo de ação se deve tomar
+        * \return booleano indicando se há ou não a necessidade de enviar um dado para o robô
+        */
+        bool readEventButton();
 
-public:
-    ManualControl();
-    ManualControl(int _device_n, SerialSender *_serial);
+        /*!
+        * \brief readEventAxis processa um evento que seja disparado por um analógico, preenchendo o vetor axis
+        */
+        void readEventAxis();
 
-    ~ManualControl();
+        /*!
+        * \brief verifyVelocityAxis verifica se os valores que estão no vetor de axis são suficientes para calcular a velocidade
+        * \return booleano indicando se o dado é ou não relevante
+        */
+        bool verifyVelocityAxis();
 
-    /*!
-     * \brief start modifica a flag running para true e reconstroi a thread td para reiniciar a thread
-     */
-    void start();
-    /*!
-     * \brief stop trava com o mutex, modificia a flag running para false e da join na thread td
-     */
-    void stop();
+        /*!
+        * \brief run é o loop principal a thread, passado por parâmetro para td
+        */
+        void run();
 
-    void setId(int _id);
-    void setMaxVelocity(float _velocity);
-    void setMaxAngularVelocity(float _velocity);
-    void setDribblerVelocity(int _velocity);
-    void setKickPower(int _power);
-    void setPassPower(int _power);
+    public:
+        ManualControl();
+        ManualControl(int device_number, Parameters param, SerialSender *serial);
+
+        ~ManualControl();
+
+        /*!
+        * \brief start modifica a flag running para true e reconstroi a thread td para reiniciar a thread
+        */
+        void start();
+        /*!
+        * \brief stop trava com o mutex, modificia a flag running para false e da join na thread td
+        */
+        void stop();
 };
 
-#endif // MANUALCONTROL_H
+#endif // MANUAL_CONTROL_H

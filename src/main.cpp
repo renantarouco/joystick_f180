@@ -2,11 +2,14 @@
 
 #include "serial_sender.h"
 #include "manual_control.h"
+#include "parameters.h"
 
 int main() {
-    furgbol::joystick::SerialSender serial_sender("/dev/ttyACM0");
+    furgbol::parameters::Parameters param;
 
-    ManualControl joystick(0, &serial_sender);
+    furgbol::joystick::SerialSender serial_sender(param.serial_port);
+
+    ManualControl joystick(0, param, &serial_sender);
 
     joystick.start();
 
