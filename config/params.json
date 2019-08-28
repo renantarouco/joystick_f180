@@ -1,0 +1,33 @@
+{
+  "networking": {
+    "serial_port": "/dev/ttyUSB0",
+    "frequency": 30
+  },
+
+
+  "robot": {
+      "id": 0
+  },
+
+
+  "limiting": {
+
+    "axis": {
+        "min": 10000,
+        "max": 32767
+    },
+
+    "velocities": {
+        "max_linear": 127,
+        "max_angular": 127,
+        "dribbler": 127
+    },
+
+    "kick": {
+        "power": 127,
+        "times": 127,
+        "pass": 50
+    }
+
+  }
+}

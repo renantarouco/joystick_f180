@@ -11,7 +11,8 @@ namespace furgbol {
 namespace joystick {
 
 enum SerialMessageHeaderFlags {
-    ROBOT_ID = 0, VEL_WHEEL_ONE = 1, VEL_WHEEL_TWO = 2, VEL_WHEEL_THREE = 3, VEL_WHEEL_FOUR = 4, DIRECTION = 5, DRIBBLER = 6, KICK = 7
+    ROBOT_ID = 0, VEL_X = 1, VEL_Y = 2, VEL_THETA = 3, DIR_X = 4, DIR_Y = 5, DIR_THETA = 6, 
+    DRIBBLER = 7, KICK = 8
 };
 
 class SerialMessage {
@@ -19,33 +20,44 @@ class SerialMessage {
         uint16_t pkg_id_;
         uint8_t msg_type_;
         uint8_t robot_id_;
-        uint8_t wheels_vel_[4];
-        uint8_t wheels_dir_[4]; 
+        uint8_t velocity_x_;
+        uint8_t velocity_y_;
+        uint8_t velocity_theta_;
+        uint8_t direction_x_;
+        uint8_t direction_y_;
+        uint8_t direction_theta_;
         uint8_t dribbler_;
         uint8_t kick_;
 
     public:
         SerialMessage();
-        SerialMessage(uint16_t pkg_id, uint8_t msg_type, uint8_t robot_id, uint8_t *wheels_vel, uint8_t dribbler, uint8_t kick);
         ~SerialMessage();
 
-        void serialize(std::vector<unsigned char> &buffer);
+        void serialize(std::vector<uint8_t> &buffer);
 
         void clear();
 
         friend std::ostream &operator <<(std::ostream &, SerialMessage const &);
 
-        void setRobotId(uint8_t id);
-        void setWheelsVel(uint8_t* vel);
-        void setWheelsDir(uint8_t* wheels_dir);
+        void setRobotId(uint8_t robot_id);
+        void setVelocityX(uint8_t velocity_x);
+        void setVelocityY(uint8_t velocity_y);
+        void setVelocityTheta(uint8_t velocity_theta);
+        void setDirectionX(uint8_t direction_x);
+        void setDirectionY(uint8_t direction_y);
+        void setDirectionTheta(uint8_t direction_theta);
         void setDribbler(uint8_t dribbler);
         void setKick(uint8_t kick);
 
         uint16_t getPkgId();
         uint8_t getMsgType();
         uint8_t getRobotId();
-        uint8_t *getWheelsVel();
-        uint8_t *getWheelsDir();
+        uint8_t getVelocityX();
+        uint8_t getVelocityY();
+        uint8_t getVelocityTheta();
+        uint8_t getDirectionX();
+        uint8_t getDirectionY();
+        uint8_t getDirectionTheta();
         uint8_t getDribbler();
         uint8_t getKick();
 };
