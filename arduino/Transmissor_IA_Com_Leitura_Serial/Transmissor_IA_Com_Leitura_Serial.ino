@@ -37,15 +37,27 @@ void loop() {
       cont++;
     }
     
-    if (cont == sizeof(dados)) {
+    if (cont >= sizeof(dados)) {
       cont = 0;
 
-      for(int i = 0; i < 9; i++) {
-        Serial.print("DADO ");
-        Serial.print(i);
-        Serial.print(": ");
-        Serial.println(dados[i], DEC);
-      }
+      Serial.print("ID do Robo: ");
+      Serial.println(dados[0]);
+      Serial.print("Velocidade em X: ");
+      Serial.println(dados[1]);
+      Serial.print("Velociade em Y: ");
+      Serial.println(dados[2]);
+      Serial.print("Velocidade em 0: ");
+      Serial.println(dados[3]);
+      Serial.print("Direcao em X: ");
+      Serial.println(dados[4]);
+      Serial.print("Direcao em Y: ");
+      Serial.println(dados[5]);
+      Serial.print("Direcao em 0: ");
+      Serial.println(dados[6]);
+      Serial.print("Dribbler: ");
+      Serial.println(dados[7]);
+      Serial.print("Kick: ");
+      Serial.println(dados[8]);
 
       radio.write(&dados, sizeof(dados));
     }

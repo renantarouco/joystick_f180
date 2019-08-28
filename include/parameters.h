@@ -18,7 +18,6 @@ class Parameters {
         int max_axis;
         int max_linear_velocity;
         int max_angular_velocity;
-        int bonus_linear_velocity;
         int dribbler_velocity;
         int kick_power;
         int kick_times;
@@ -27,6 +26,7 @@ class Parameters {
         int robot_id;
 
         std::string serial_port;
+        int frequency;
 
         Parameters();
         ~Parameters();

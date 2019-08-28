@@ -2,17 +2,17 @@
 
 #include "manual_control.h"
 
-ManualControl::ManualControl() : device_number_(-1), max_linear_velocity_(0), max_angular_velocity_(0), running_(false), rotating_(false), dribbling_(false), kicking_(0), serial_(), bonus_linear_velocity_(0), robot_id_(0) {
+ManualControl::ManualControl() : device_number_(-1), max_linear_velocity_(0), max_angular_velocity_(0), running_(false), rotating_(false), dribbling_(false), kicking_(0), serial_(), robot_id_(0) {
     axis_ = vector<short>(2, 0);
 
     message_.setRobotId(robot_id_);
 }
 
-ManualControl::ManualControl(int device_number, Parameters param, SerialSender *serial) 
-    : device_number_(device_number), max_linear_velocity_(param.max_linear_velocity),
+ManualControl::ManualControl(int device_number, Parameters param, SerialSender *serial) : 
+    device_number_(device_number), max_linear_velocity_(param.max_linear_velocity), frequency_(1.0/param.frequency),
     max_angular_velocity_(param.max_angular_velocity), running_(false), rotating_(false),
-    dribbling_(false), kicking_(0), serial_(serial), bonus_linear_velocity_(param.bonus_linear_velocity),
-    robot_id_(param.robot_id), max_axis_(param.max_axis), min_axis_(param.min_axis), kick_times_(param.kick_times),
+    dribbling_(false), kicking_(0), serial_(serial), robot_id_(param.robot_id), 
+    max_axis_(param.max_axis), min_axis_(param.min_axis), kick_times_(param.kick_times),
     dribbler_velocity_(param.dribbler_velocity), kick_power_(param.kick_power), pass_power_(param.pass_power)
 {
     joystick_ = new Joystick(device_number);
@@ -42,6 +42,9 @@ void ManualControl::stop() {
 void ManualControl::run() {
     bool button_send = false;
     bool axis_send = false;
+    
+    system_clock::time_point compair_time = high_resolution_clock::now();
+
     if (!joystick_->isFound()) cout << "Falha ao abrir o controle." << endl;
 
     while (running_) {
@@ -70,16 +73,20 @@ void ManualControl::run() {
         if (abs(axis_[AXIS_Y]) < min_axis_) axis_[AXIS_Y] = 0;
 
         if (axis_send || rotating_ || button_send || dribbling_ || kicking_) {
-            message_.setVelocityX((uint8_t)linear_velocity_x_);
-            message_.setVelocityY((uint8_t)linear_velocity_y_);
-            message_.setVelocityTheta((uint8_t)angular_velocity_);
-            message_.setDirectionX(direction_x_);
-            message_.setDirectionY(direction_y_);
-            message_.setDirectionTheta(direction_theta_);
-
-            cout << "Mensagem: " << endl;
-            cout << message_ << endl;
-            serial_->send(message_);
+            if ((high_resolution_clock::now() - compair_time) >= frequency_) {
+                message_.setRobotId(robot_id_);
+                message_.setVelocityX((uint8_t)linear_velocity_x_);
+                message_.setVelocityY((uint8_t)linear_velocity_y_);
+                message_.setDirectionX(direction_x_);
+                message_.setDirectionY(direction_y_);
+                message_.setVelocityTheta((uint8_t)angular_velocity_);
+                message_.setDirectionTheta(direction_theta_);
+                cout << "Mensagem: " << endl;
+                cout << message_ << endl;
+                serial_->send(message_);   
+                message_.clear();
+                compair_time = high_resolution_clock::now();
+            }
         }
 
         if(kicking_) ++kicking_;
@@ -103,36 +110,25 @@ bool ManualControl::readEventButton() {
                 kicking_ = 1;
             }
             break;
-        case Y: //Lançamento
-            if (event_.value) {
-                message_.setKick(kick_power_);
-                kicking_ = 1;
-            }
-            break;
         case LB: //Dribbler
             if (event_.value) message_.setDribbler(dribbler_velocity_);
             else message_.setDribbler(0);
             dribbling_ = event_.value;
-            //drible h
             break;
-        case RB:
-            if (event_.value) bonus_linear_velocity_ =  1.0;
-            else bonus_linear_velocity_ = 0;
-            //boost
-            break;
-        case LT:
+        case LS: //Girar em sentido horário
             if (event_.value) angular_velocity_ = max_angular_velocity_;
             else angular_velocity_ = 0.0;
             rotating_ = event_.value;
             direction_theta_ = 3;
-            //gira h
+            message_.setVelocityTheta((uint8_t)angular_velocity_);
+            message_.setDirectionTheta(direction_theta_);
             break;
-        case RT:
+        case RS: //Girar em sentido anti-horário
             if(event_.value) angular_velocity_ = max_angular_velocity_;
             else angular_velocity_ = 0.0;
             rotating_ = event_.value;
             direction_theta_ = 1;
-            //gira a-h
+            
             break;
         default:
             return false;
@@ -158,6 +154,6 @@ void ManualControl::calculateVelocity() {
     if (axis_[AXIS_Y] < 0) direction_y_ = 3;
     else direction_y_ = 1;
 
-    linear_velocity_x_ = (int)(abs(axis_[AXIS_X]) * (max_linear_velocity_ + bonus_linear_velocity_) / max_axis_);
-    linear_velocity_y_ = (int)(abs(axis_[AXIS_X]) * (max_linear_velocity_ + bonus_linear_velocity_) / max_axis_);
+    linear_velocity_x_ = (int)(abs(axis_[AXIS_X]) * max_linear_velocity_ / max_axis_);
+    linear_velocity_y_ = (int)(abs(axis_[AXIS_Y]) * max_linear_velocity_ / max_axis_);
 }

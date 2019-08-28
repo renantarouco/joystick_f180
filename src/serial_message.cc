@@ -11,7 +11,7 @@ SerialMessage::SerialMessage() { clear(); }
 
 SerialMessage::~SerialMessage() {}
 
-void SerialMessage::serialize(std::vector<unsigned char> &buffer) {
+void SerialMessage::serialize(std::vector<uint8_t> &buffer) {
     buffer[ROBOT_ID] = robot_id_+128;
     buffer[VEL_X] = velocity_x_;
     buffer[VEL_Y] = velocity_y_;

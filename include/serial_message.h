@@ -15,10 +15,6 @@ enum SerialMessageHeaderFlags {
     DRIBBLER = 7, KICK = 8
 };
 
-enum VelocitiesFlags {
-    ONE, TWO, THREE, FOUR
-};
-
 class SerialMessage {
     private:
         uint16_t pkg_id_;
@@ -37,7 +33,7 @@ class SerialMessage {
         SerialMessage();
         ~SerialMessage();
 
-        void serialize(std::vector<unsigned char> &buffer);
+        void serialize(std::vector<uint8_t> &buffer);
 
         void clear();
 

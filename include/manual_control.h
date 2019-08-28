@@ -15,17 +15,19 @@
 #include <thread>
 #include <mutex>
 #include <cstdio>
+#include <chrono>
 
 using namespace std;
 using namespace furgbol::joystick;
 using namespace furgbol::parameters;
+using namespace std::chrono;
 
 enum Axis{
     AXIS_X, AXIS_Y
 };
 
 enum Buttons {
-    A, B, X, Y, LB, RB, LT, RT
+    A = 0, X = 2, LB = 4, LS = 11, RS = 12
 };
 
 /*!
@@ -60,13 +62,13 @@ class ManualControl {
         //Parâmetros
         int max_linear_velocity_; //!<Velocidade linear máxima que o robô pode assumir
         int max_angular_velocity_; //!<Velocidade angular máxima que o robô pode assumir
-        int bonus_linear_velocity_; //!<Variável para dar um boost de velocidade quando clicar no botão
         int dribbler_velocity_; //!<Velocidade do dribbler pwm
         int kick_power_; //!<Força do chute em pwm
         int pass_power_; //!<Força do passe em pwm
         int max_axis_; //!<Variável para armazenar o valor máximo lido pelo axis
         int min_axis_; //!<Variável para armazenar o valor mínimo lido pelo axis
         int kick_times_; //!<Variável para armazenar o número de vezes que o robô vai tentar chutar
+        duration<float> frequency_; //!<Variável para armazenar a frequência de transmissão
 
         //Networking
         SerialMessage message_; //!<Mensagem que será envidada
