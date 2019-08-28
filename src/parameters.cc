@@ -9,6 +9,22 @@ namespace parameters {
 
 Parameters::Parameters() {
     read_parameters();
+
+    std::cout << "****Parameters Setted****" << std::endl;
+    std::cout << "-> Networking:" << std::endl;
+    std::cout << "Serial Port: " << serial_port << std::endl;
+    std::cout << "Frequency: " << frequency << std::endl;
+    std::cout << "-> Limiting:" << std::endl;
+    std::cout << "Min Axis: " << min_axis << std::endl;
+    std::cout << "Max Axis: " << max_axis << std::endl;
+    std::cout << "Max Linear Velocity: " << max_linear_velocity << std::endl;
+    std::cout << "Max Angular Velocity: " << max_angular_velocity << std::endl;
+    std::cout << "Dribbler Velocity: " << dribbler_velocity << std::endl;
+    std::cout << "Kick Times: " << kick_times << std::endl;
+    std::cout << "Kick Power: " << kick_power << std::endl;
+    std::cout << "Pass Power: " << pass_power << std::endl;
+    std::cout << "-> Robot ID: " << robot_id << std::endl;
+    std::cout << std::endl;
 }
 
 Parameters::~Parameters() {}
