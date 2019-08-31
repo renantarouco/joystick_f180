@@ -2,18 +2,21 @@
 
 #include "manual_control.h"
 
-ManualControl::ManualControl() : device_number_(-1), max_linear_velocity_(0), max_angular_velocity_(0), running_(false), rotating_(false), dribbling_(false), kicking_(0), serial_(), robot_id_(0) {
+ManualControl::ManualControl() : device_number_(-1), max_linear_velocity_(0), max_angular_velocity_(0), 
+    running_(false), rotating_(false), dribbling_(false), kicking_(0), serial_(), robot_id_(0) 
+{
     axis_ = vector<short>(2, 0);
 
     message_.setRobotId(robot_id_);
 }
 
 ManualControl::ManualControl(int device_number, Parameters param, SerialSender *serial) : 
-    device_number_(device_number), max_linear_velocity_(param.max_linear_velocity), frequency_(1.0/param.frequency),
-    max_angular_velocity_(param.max_angular_velocity), running_(false), rotating_(false),
-    dribbling_(false), kicking_(0), serial_(serial), robot_id_(param.robot_id), 
-    max_axis_(param.max_axis), min_axis_(param.min_axis), kick_times_(param.kick_times),
-    dribbler_velocity_(param.dribbler_velocity), kick_power_(param.kick_power), pass_power_(param.pass_power)
+    device_number_(device_number), max_linear_velocity_(param.max_linear_velocity), 
+    frequency_(1.0/param.frequency), max_angular_velocity_(param.max_angular_velocity), 
+    running_(false), rotating_(false), dribbling_(false), kicking_(0), serial_(serial), 
+    robot_id_(param.robot_id), max_axis_(param.max_axis), min_axis_(param.min_axis), 
+    kick_times_(param.kick_times), dribbler_velocity_(param.dribbler_velocity), 
+    kick_power_(param.kick_power), pass_power_(param.pass_power)
 {
     joystick_ = new Joystick(device_number);
 
@@ -60,7 +63,7 @@ void ManualControl::run() {
         if (kicking_ >= kick_times_) {
             kicking_ = 0;
             message_.setKick(0);
-            button_send = true; //manda mais um dado setando o chute para 0 (bug no código arduino do robô)
+            button_send = true;
         }
 
         if (axis_send) calculateVelocity();
@@ -95,16 +98,15 @@ void ManualControl::run() {
     message_.clear();
 }
 
-//Métodos do controle
 bool ManualControl::readEventButton() {
     switch (event_.number) {
-        case A: //Passe baixo
+        case A: //Low pass
             if (event_.value) {
                 message_.setKick(pass_power_);
                 kicking_ = 1;
             }
             break;
-        case X: //Chute baixo
+        case X: //Low kick
             if (event_.value) {
                 message_.setKick(kick_power_);
                 kicking_ = 1;
@@ -115,20 +117,17 @@ bool ManualControl::readEventButton() {
             else message_.setDribbler(0);
             dribbling_ = event_.value;
             break;
-        case LS: //Girar em sentido horário
+        case LS: //Rotate clockwise
             if (event_.value) angular_velocity_ = max_angular_velocity_;
             else angular_velocity_ = 0.0;
             rotating_ = event_.value;
             direction_theta_ = 3;
-            message_.setVelocityTheta((uint8_t)angular_velocity_);
-            message_.setDirectionTheta(direction_theta_);
             break;
-        case RS: //Girar em sentido anti-horário
+        case RS: //Rotate counterclockwise
             if(event_.value) angular_velocity_ = max_angular_velocity_;
             else angular_velocity_ = 0.0;
             rotating_ = event_.value;
             direction_theta_ = 1;
-            
             break;
         default:
             return false;
