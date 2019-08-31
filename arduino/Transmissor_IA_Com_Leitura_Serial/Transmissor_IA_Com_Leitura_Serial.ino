@@ -8,19 +8,20 @@
 RF24 radio(CE, CSN); // Define quais serão os pinos do arduino usados para conectar o CE e o CS no rádio
 
 uint8_t dados[9];
-int i;
+int tx_dados[9];
 //dado = {id, vx, vy, v0, dx, dy, d0, kick, dribbler}
 
 const uint64_t pipe[6] = {0xF1F1F1F1E1LL, 0xF0F0F0F0E2LL, 0xF0F0F0F0E3LL, 0xF0F0F0F0E4LL, 0xF0F0F0F0E5LL, 0xF0F0F0F0E6LL};  // Endereços do radio
 
 uint8_t c;
 int cont;
+int i;
 
 void setup()
 {
   Serial.begin(115200);
   radio.begin();
-  radio.setChannel(73);
+  radio.setChannel(48);
   radio.openWritingPipe(pipe[1]); // Começa a enviar msg para os robos
 
 }
@@ -58,6 +59,8 @@ void loop() {
       Serial.println(dados[7]);
       Serial.print("Kick: ");
       Serial.println(dados[8]);
+
+      for (i = 0; i < 9; i++) tx_dados[i] = (int)dados[i];
 
       radio.write(&dados, sizeof(dados));
     }

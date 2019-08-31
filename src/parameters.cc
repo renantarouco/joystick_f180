@@ -8,7 +8,7 @@ namespace furgbol {
 namespace parameters {
 
 Parameters::Parameters() {
-    read_parameters();
+    readParameters();
 
     std::cout << "****Parameters Setted****" << std::endl;
     std::cout << "-> Networking:" << std::endl;
@@ -29,7 +29,7 @@ Parameters::Parameters() {
 
 Parameters::~Parameters() {}
 
-void Parameters::read_parameters() {
+void Parameters::readParameters() {
     std::ifstream i("config/params.json");
     nlohmann::json j;
     i >> j;

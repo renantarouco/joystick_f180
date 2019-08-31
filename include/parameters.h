@@ -12,26 +12,32 @@
 namespace furgbol {
 namespace parameters {
 
+/*!
+ * \brief The Parameters class handles the parameters that are passed by .json
+ */
 class Parameters {
     public:
-        int min_axis;
-        int max_axis;
-        int max_linear_velocity;
-        int max_angular_velocity;
-        int dribbler_velocity;
-        int kick_power;
-        int kick_times;
-        int pass_power;
+        int min_axis; //!<Minimal axis value accepted
+        int max_axis; //!<Maximal axis value accepted
+        int max_linear_velocity; //!<Maximal linear velocity accepted
+        int max_angular_velocity; //!<Maximal angular velocity accepted
+        int dribbler_velocity; //!<Maximal dribbler velocity accepted
+        int kick_power; //!<Robot kick strenght
+        int kick_times; //!<Number of times the robot tries to kick
+        int pass_power; //!<Robot pass strength
 
-        int robot_id;
+        int robot_id; //!<ID of the robot that will be controlled
 
-        std::string serial_port;
-        int frequency;
+        std::string serial_port; //!<Address of the serial port that will be used
+        int frequency; //!<Frequency in Hz of packet sending
 
         Parameters();
         ~Parameters();
 
-        void read_parameters();
+        /*!
+         * \brief readParameters reads the .json file and assigns the values to its variables
+         */
+        void readParameters();
 };
 
 }  // namespace paramaters

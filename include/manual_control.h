@@ -1,7 +1,7 @@
 // Copyright 2019 FURGBot
 
-#ifndef MANUAL_CONTROL_H
-#define MANUAL_CONTROL_H
+#ifndef JOYSTICK_MANUAL_CONTROL_H
+#define JOYSTICK_MANUAL_CONTROL_H
 
 #include "serial_message.h"
 #include "serial_sender.h"
@@ -31,73 +31,72 @@ enum Buttons {
 };
 
 /*!
- * \brief A classe ManualControl administra uma thread para fazer leitura do joystick, montagem do pacote serial
- * e adição na lista para envio da thread SerialCommunicator
+ * \brief The ManualControl class manages a thread to read the joystick, mount the serial package, and add to the SerialCommunicator thread submission list
  */
 class ManualControl {
     private:
-        //Variáveis de thread
-        bool running_; //!<Flag de controle de execução da Thread
-        thread td_; //!<Thread da classe
-        mutex mu_; //!<Mutex para escrita na flag running
+        //Thread Variables
+        bool running_; //!<Thread Execution Control Flag
+        thread td_; //!<Class Thread
+        mutex mu_; //!<Mutex for writing on flag running
 
-        //Variáveis do joystick
-        int device_number_; //!<Número do joystick utilizado pela thread
-        Joystick *joystick_; //!<Objeto da classe Joystick para fazer leitura do arquivo em que o joystick escreve seus dados
-        JoystickEvent event_; //!<Objeto da classe JoystickEvent para verificar se houve algum evento no joystick que deve ser processado
-        vector<short> axis_; //!<Vetor que guarda o valor dos analógicos do joystick
+        //Joystick Variables
+        int device_number_; //!<Joystick number used by thread
+        Joystick *joystick_; //!<Joystick class object to read the file where the joystick writes its data
+        JoystickEvent event_; //!<JoystickEvent class object to check for joystick events that should be processed
+        vector<short> axis_; //!<Vector holding joystick analog value
 
-        //Variáveis de controle
-        int robot_id_; //!<Variável que guarda o id do robô que vai ser controlado
-        bool rotating_; //!<Flag para indicar se o botão de rotação está pressionado ou não
-        bool dribbling_; //!<Flag para indicar se o botão de dribbler está pressionado ou não
-        int kicking_; //!<Variável para garantir que o robô vai tentar chutar kick_times_ para facilitar o chute na hora de controlar
-        int linear_velocity_x_; //!<Variável que guarda a velocidade linear em x
-        int linear_velocity_y_; //!<Variável que guarda a velocidade linear em y
-        int angular_velocity_; //!<Variável que guarda a velocidade angular
-        int direction_x_; //!<Variável que guarda a direção da velocidade linear em x
-        int direction_y_; //!<Variável que guarda a direção da velocidade linear em y
-        int direction_theta_; //!<Variável que guarda a direção da velocidade angular
+        //Control Variables
+        int robot_id_; //!<Variable that holds the id of the robot to be controlled
+        bool rotating_; //!<Flag to indicate whether the spin button is pressed or not
+        bool dribbling_; //!<Flag to indicate if the dribbler button is pressed or not
+        int kicking_; //!<Variable to ensure that the robot will attempt to kick kick_times_ to facilitate kick control
+        int linear_velocity_x_; //!<Variable that stores the linear velocity in x axis
+        int linear_velocity_y_; //!<Variable that stores the linear velocity in y axis
+        int angular_velocity_; //!<Variable that keeps the angular velocity
+        int direction_x_; //!<Variable that keeps the direction of linear velocity in x axis
+        int direction_y_; //!<Variable that keeps the linear velocity direction in y axis
+        int direction_theta_; //!<Variable that keeps the direction of angular velocity
 
-        //Parâmetros
-        int max_linear_velocity_; //!<Velocidade linear máxima que o robô pode assumir
-        int max_angular_velocity_; //!<Velocidade angular máxima que o robô pode assumir
-        int dribbler_velocity_; //!<Velocidade do dribbler pwm
-        int kick_power_; //!<Força do chute em pwm
-        int pass_power_; //!<Força do passe em pwm
-        int max_axis_; //!<Variável para armazenar o valor máximo lido pelo axis
-        int min_axis_; //!<Variável para armazenar o valor mínimo lido pelo axis
-        int kick_times_; //!<Variável para armazenar o número de vezes que o robô vai tentar chutar
-        duration<float> frequency_; //!<Variável para armazenar a frequência de transmissão
+        //Parameters
+        int max_linear_velocity_; //!<Maximum linear speed the robot can assume
+        int max_angular_velocity_; //!<Maximum angular velocity the robot can assume
+        int dribbler_velocity_; //!<Dribbler speed in pwm
+        int kick_power_; //!<Kick strength in pwm
+        int pass_power_; //!<Pass strength in pwm
+        int max_axis_; //!<Variable to store the maximum value read by the axis
+        int min_axis_; //!<Variable to store the minimum value read by the axis
+        int kick_times_; //!<Variable to store the number of times the robot will try to kick
+        duration<float> frequency_; //!<Variable to store the transmission frequency
 
         //Networking
-        SerialMessage message_; //!<Mensagem que será envidada
-        SerialSender *serial_; //!<Ponteiro para a thread de comunicação serial
+        SerialMessage message_; //!<Message to be sent
+        SerialSender *serial_; //!<Pointer to the serial communication thread
 
         /*!
-        * \brief calculateVelocity calcula a velocidade linear do robô com base no valor oferecido pelo vetor axis
-        */
+         * \brief calculateVelocity calculates the linear velocity of the robot based on the value offered by the axis vector
+         */
         void calculateVelocity();
 
         /*!
-        * \brief readEventButton processa um evento que seja disparado por um botão, verificando que tipo de ação se deve tomar
-        * \return booleano indicando se há ou não a necessidade de enviar um dado para o robô
-        */
+         * \brief readEventButton processes an event that is triggered by a button, checking what type of action to take 
+         * \return boolean indicating whether or not to send data to the robot
+         */
         bool readEventButton();
 
         /*!
-        * \brief readEventAxis processa um evento que seja disparado por um analógico, preenchendo o vetor axis
+        * \brief readEventAxis processes an event that is triggered by an analog, filling the axis vector
         */
         void readEventAxis();
 
         /*!
-        * \brief verifyVelocityAxis verifica se os valores que estão no vetor de axis são suficientes para calcular a velocidade
-        * \return booleano indicando se o dado é ou não relevante
+        * \brief verifyVelocityAxis checks if the values in the axis vector are sufficient to calculate the velocity
+        * \return boolean indicating whether the data is relevant or not
         */
         bool verifyVelocityAxis();
 
         /*!
-        * \brief run é o loop principal a thread, passado por parâmetro para td
+        * \brief run is the main loop to thread, passed by parameter to td
         */
         void run();
 
@@ -108,13 +107,13 @@ class ManualControl {
         ~ManualControl();
 
         /*!
-        * \brief start modifica a flag running para true e reconstroi a thread td para reiniciar a thread
+        * \brief start sets the running flag to true and rebuilds thread td to restart the thread
         */
         void start();
         /*!
-        * \brief stop trava com o mutex, modificia a flag running para false e da join na thread td
+        * \brief stop hangs with mutex, set running flag to false and join in thread td
         */
         void stop();
 };
 
-#endif // MANUAL_CONTROL_H
+#endif // JOYSTICK_MANUAL_CONTROL_H
