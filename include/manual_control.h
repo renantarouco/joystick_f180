@@ -3,8 +3,8 @@
 #ifndef JOYSTICK_MANUAL_CONTROL_H
 #define JOYSTICK_MANUAL_CONTROL_H
 
-#include "serial_message.h"
-#include "serial_sender.h"
+#include "furgbol-core/io/serial_message.h"
+#include "furgbol-core/io/serial_sender.h"
 #include "parameters.h"
 
 #include "joystick.hh"
@@ -18,7 +18,7 @@
 #include <chrono>
 
 using namespace std;
-using namespace furgbol::joystick;
+using namespace furgbol::io;
 using namespace furgbol::parameters;
 using namespace std::chrono;
 
