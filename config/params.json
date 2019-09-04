@@ -1,7 +1,7 @@
 {
   "networking": {
-    "serial_port": "/dev/ttyUSB0",
-    "frequency": 300
+    "serial_port": "/dev/ttyACM0",
+    "frequency": 60
   },
 
 
@@ -18,8 +18,8 @@
     },
 
     "velocities": {
-        "max_linear": 30,
-        "max_angular": 30,
+        "max_linear": 127,
+        "max_angular": 127,
         "dribbler": 127
     },
 
