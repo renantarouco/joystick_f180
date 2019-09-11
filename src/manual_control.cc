@@ -4,7 +4,7 @@
 
 ManualControl::ManualControl() : device_number_(-1), max_linear_velocity_(0), max_angular_velocity_(0), 
     running_(false), rotating_(false), dribbling_(false), kicking_(0), serial_(), robot_id_(0), pkg_id_(0),
-    msg_type_(0), buffer_to_send_(vector<uint8_t>(5, 0))
+    msg_type_(0), buffer_to_send_(vector<uint8_t>(9, 0))
 {
     axis_ = vector<short>(2, 0);
 
@@ -18,7 +18,7 @@ ManualControl::ManualControl(int device_number, Parameters param, SerialSender *
     robot_id_(param.robot_id), max_axis_(param.max_axis), min_axis_(param.min_axis), 
     kick_times_(param.kick_times), dribbler_velocity_(param.dribbler_velocity), 
     kick_power_(param.kick_power), pass_power_(param.pass_power), pkg_id_(0), msg_type_(param.msg_type),
-    buffer_to_send_(vector<uint8_t>(5, 0))
+    buffer_to_send_(vector<uint8_t>(9, 0))
 {
     joystick_ = new Joystick(device_number);
 

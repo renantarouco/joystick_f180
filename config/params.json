@@ -2,7 +2,7 @@
   "networking": {
     "serial_port": "/dev/ttyUSB0",
     "frequency": 30,
-    "message_type": 1
+    "message_type": 0
   },
 
 
