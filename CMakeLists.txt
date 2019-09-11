@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-project(furgbol_joystick)
+project(furgbol_joystick_f180)
 
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
 
@@ -13,6 +13,6 @@ add_library(furgbol_joy "src/manual_control.cc" "src/parameters.cc" "include/jso
 
 target_link_libraries(furgbol_joy ${Boost_SYSTEM_LIBRARY} "/home/miguel/Workspaces/furgbot/furgbol-core/lib/libfurgbol-core-io.a")
 
-add_executable(joystick "src/main.cpp")
+add_executable(joystick_f180 "src/main.cpp")
 
-target_link_libraries(joystick furgbol_joy ${Boost_LIBRARIES} libjoystick.a)
+target_link_libraries(joystick_f180 furgbol_joy ${Boost_LIBRARIES} libjoystick.a)

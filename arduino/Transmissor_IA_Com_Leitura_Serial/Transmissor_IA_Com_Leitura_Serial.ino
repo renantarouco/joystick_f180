@@ -21,11 +21,12 @@ void setup()
 {
   Serial.begin(115200);
   radio.begin();
-  radio.setChannel(48);
-  radio.openWritingPipe(pipe[1]);
+  radio.setChannel(100);
 }
 
 void loop() {
+  radio.openWritingPipe(pipe[1]);
+  
   // Começa a enviar msg para os robos
   if(Serial.available()) {
     c = Serial.read();

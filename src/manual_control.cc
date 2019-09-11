@@ -3,7 +3,8 @@
 #include "manual_control.h"
 
 ManualControl::ManualControl() : device_number_(-1), max_linear_velocity_(0), max_angular_velocity_(0), 
-    running_(false), rotating_(false), dribbling_(false), kicking_(0), serial_(), robot_id_(0) 
+    running_(false), rotating_(false), dribbling_(false), kicking_(0), serial_(), robot_id_(0), pkg_id_(0),
+    msg_type_(0), buffer_to_send_(vector<uint8_t>(9, 0))
 {
     axis_ = vector<short>(2, 0);
 
@@ -16,7 +17,8 @@ ManualControl::ManualControl(int device_number, Parameters param, SerialSender *
     running_(false), rotating_(false), dribbling_(false), kicking_(0), serial_(serial), 
     robot_id_(param.robot_id), max_axis_(param.max_axis), min_axis_(param.min_axis), 
     kick_times_(param.kick_times), dribbler_velocity_(param.dribbler_velocity), 
-    kick_power_(param.kick_power), pass_power_(param.pass_power)
+    kick_power_(param.kick_power), pass_power_(param.pass_power), pkg_id_(0), msg_type_(param.msg_type),
+    buffer_to_send_(vector<uint8_t>(9, 0))
 {
     joystick_ = new Joystick(device_number);
 
@@ -77,17 +79,15 @@ void ManualControl::run() {
 
         if (axis_send || rotating_ || button_send || dribbling_ || kicking_) {
             if ((high_resolution_clock::now() - compair_time) >= frequency_) {
-                message_.setRobotId(robot_id_);
-                message_.setVelocityX((uint8_t)linear_velocity_x_);
-                message_.setVelocityY((uint8_t)linear_velocity_y_);
-                message_.setDirectionX(direction_x_);
-                message_.setDirectionY(direction_y_);
-                message_.setVelocityTheta((uint8_t)angular_velocity_);
-                message_.setDirectionTheta(direction_theta_);
-                cout << "Mensagem: " << endl;
-                cout << message_ << endl;
-                serial_->send(message_);   
                 message_.clear();
+                createMessage();
+                cout << message_ << endl;
+
+                buffer_to_send_ = vector<uint8_t>(9, 0);
+                message_.serialize(buffer_to_send_);
+                serial_->send(buffer_to_send_);
+                
+                pkg_id_++;
                 compair_time = high_resolution_clock::now();
             }
         }
@@ -118,16 +118,16 @@ bool ManualControl::readEventButton() {
             dribbling_ = event_.value;
             break;
         case LS: //Rotate clockwise
-            if (event_.value) angular_velocity_ = max_angular_velocity_;
-            else angular_velocity_ = 0.0;
-            rotating_ = event_.value;
-            direction_theta_ = 3;
-            break;
-        case RS: //Rotate counterclockwise
-            if(event_.value) angular_velocity_ = max_angular_velocity_;
+            if (event_.value) angular_velocity_ = static_cast<unsigned char>(max_angular_velocity_);
             else angular_velocity_ = 0.0;
             rotating_ = event_.value;
             direction_theta_ = 1;
+            break;
+        case RS: //Rotate counterclockwise
+            if(event_.value) angular_velocity_ = static_cast<unsigned char>(max_angular_velocity_);
+            else angular_velocity_ = 0.0;
+            rotating_ = event_.value;
+            direction_theta_ = 3;
             break;
         default:
             return false;
@@ -153,6 +153,18 @@ void ManualControl::calculateVelocity() {
     if (axis_[AXIS_Y] < 0) direction_y_ = 3;
     else direction_y_ = 1;
 
-    linear_velocity_x_ = (int)(abs(axis_[AXIS_X]) * max_linear_velocity_ / max_axis_);
-    linear_velocity_y_ = (int)(abs(axis_[AXIS_Y]) * max_linear_velocity_ / max_axis_);
+    linear_velocity_x_ = static_cast<unsigned char>((int)(abs(axis_[AXIS_X]) * max_linear_velocity_ / max_axis_));
+    linear_velocity_y_ = static_cast<unsigned char>((int)(abs(axis_[AXIS_Y]) * max_linear_velocity_ / max_axis_));
+}
+
+void ManualControl::createMessage() {
+    message_.setPkgId(pkg_id_);
+    message_.setMsgType(msg_type_);
+    message_.setRobotId(robot_id_);
+    message_.setVelocityX(linear_velocity_x_);
+    message_.setVelocityY(linear_velocity_y_);
+    message_.setDirectionX(direction_x_);
+    message_.setDirectionY(direction_y_);
+    message_.setVelocityTheta(angular_velocity_);
+    message_.setDirectionTheta(direction_theta_);
 }
