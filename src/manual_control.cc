@@ -82,14 +82,15 @@ void ManualControl::run() {
                 message_.setPkgId(pkg_id_);
                 message_.setMsgType(msg_type_);
                 message_.setRobotId(robot_id_);
-                message_.setVelocityX((uint8_t)linear_velocity_x_);
-                message_.setVelocityY((uint8_t)linear_velocity_y_);
+                message_.setVelocityX(linear_velocity_x_);
+                message_.setVelocityY(linear_velocity_y_);
                 message_.setDirectionX(direction_x_);
                 message_.setDirectionY(direction_y_);
-                message_.setVelocityTheta((uint8_t)angular_velocity_);
+                message_.setVelocityTheta(angular_velocity_);
                 message_.setDirectionTheta(direction_theta_);
                 cout << "Mensagem: " << endl;
                 cout << message_ << endl;
+                buffer_to_send_ = vector<uint8_t>(9, 0);
                 message_.serialize(buffer_to_send_);
                 serial_->send(buffer_to_send_);
                 message_.clear();
@@ -124,16 +125,16 @@ bool ManualControl::readEventButton() {
             dribbling_ = event_.value;
             break;
         case LS: //Rotate clockwise
-            if (event_.value) angular_velocity_ = max_angular_velocity_;
-            else angular_velocity_ = 0.0;
-            rotating_ = event_.value;
-            direction_theta_ = 3;
-            break;
-        case RS: //Rotate counterclockwise
-            if(event_.value) angular_velocity_ = max_angular_velocity_;
+            if (event_.value) angular_velocity_ = static_cast<unsigned char>(max_angular_velocity_);
             else angular_velocity_ = 0.0;
             rotating_ = event_.value;
             direction_theta_ = 1;
+            break;
+        case RS: //Rotate counterclockwise
+            if(event_.value) angular_velocity_ = static_cast<unsigned char>(max_angular_velocity_);
+            else angular_velocity_ = 0.0;
+            rotating_ = event_.value;
+            direction_theta_ = 3;
             break;
         default:
             return false;
@@ -159,6 +160,6 @@ void ManualControl::calculateVelocity() {
     if (axis_[AXIS_Y] < 0) direction_y_ = 3;
     else direction_y_ = 1;
 
-    linear_velocity_x_ = (int)(abs(axis_[AXIS_X]) * max_linear_velocity_ / max_axis_);
-    linear_velocity_y_ = (int)(abs(axis_[AXIS_Y]) * max_linear_velocity_ / max_axis_);
+    linear_velocity_x_ = static_cast<unsigned char>((int)(abs(axis_[AXIS_X]) * max_linear_velocity_ / max_axis_));
+    linear_velocity_y_ = static_cast<unsigned char>((int)(abs(axis_[AXIS_Y]) * max_linear_velocity_ / max_axis_));
 }

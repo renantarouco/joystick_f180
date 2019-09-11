@@ -43,7 +43,7 @@ void loop() {
       cont = 0;
       for (i = 0; i < 9; i++) tx_dados[i] = (int)dados[i];
       
-      /*Serial.print("ID do Robo: ");
+      Serial.print("ID do Robo: ");
       Serial.println(tx_dados[0]);
       Serial.print("Velocidade em X: ");
       Serial.println(tx_dados[1]);
@@ -60,7 +60,7 @@ void loop() {
       Serial.print("Dribbler: ");
       Serial.println(tx_dados[7]);
       Serial.print("Kick: ");
-      Serial.println(tx_dados[8]);*/
+      Serial.println(tx_dados[8]);
 
       radio.write(&tx_dados, sizeof(tx_dados));
     }

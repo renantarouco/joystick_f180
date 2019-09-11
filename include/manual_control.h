@@ -51,12 +51,12 @@ class ManualControl {
         bool rotating_; //!<Flag to indicate whether the spin button is pressed or not
         bool dribbling_; //!<Flag to indicate if the dribbler button is pressed or not
         int kicking_; //!<Variable to ensure that the robot will attempt to kick kick_times_ to facilitate kick control
-        int linear_velocity_x_; //!<Variable that stores the linear velocity in x axis
-        int linear_velocity_y_; //!<Variable that stores the linear velocity in y axis
-        int angular_velocity_; //!<Variable that keeps the angular velocity
-        int direction_x_; //!<Variable that keeps the direction of linear velocity in x axis
-        int direction_y_; //!<Variable that keeps the linear velocity direction in y axis
-        int direction_theta_; //!<Variable that keeps the direction of angular velocity
+        uint8_t linear_velocity_x_; //!<Variable that stores the linear velocity in x axis
+        uint8_t linear_velocity_y_; //!<Variable that stores the linear velocity in y axis
+        uint8_t angular_velocity_; //!<Variable that keeps the angular velocity
+        uint8_t direction_x_; //!<Variable that keeps the direction of linear velocity in x axis
+        uint8_t direction_y_; //!<Variable that keeps the linear velocity direction in y axis
+        uint8_t direction_theta_; //!<Variable that keeps the direction of angular velocity
 
         //Parameters
         int max_linear_velocity_; //!<Maximum linear speed the robot can assume

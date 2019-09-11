@@ -1,6 +1,6 @@
 {
   "networking": {
-    "serial_port": "/dev/ttyUSB0",
+    "serial_port": "/dev/ttyACM0",
     "frequency": 30,
     "message_type": 0
   },
