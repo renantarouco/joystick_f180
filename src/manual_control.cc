@@ -79,24 +79,14 @@ void ManualControl::run() {
 
         if (axis_send || rotating_ || button_send || dribbling_ || kicking_) {
             if ((high_resolution_clock::now() - compair_time) >= frequency_) {
+                message_.clear();
                 createMessage();
                 cout << message_ << endl;
 
-                message_.serialize(buffer_to_send_);
-                cout << "Testando Mensagem:" << endl;
-                cout << "-> Robot ID: " << static_cast<int>(buffer_to_send_[ROBOT_ID]) << endl;
-                cout << "-> Velocity X: " << static_cast<int>(buffer_to_send_[VEL_X]) << endl;
-                cout << "-> Velocity Y: " << static_cast<int>(buffer_to_send_[VEL_Y]) << endl;
-                cout << "-> Velocity Theta: " << static_cast<int>(buffer_to_send_[VEL_THETA]) << endl;
-                cout << "-> Direction X: " << static_cast<int>(buffer_to_send_[DIR_X]) << endl;
-                cout << "-> Direction Y: " << static_cast<int>(buffer_to_send_[DIR_Y]) << endl;
-                cout << "-> Direction Theta: " << static_cast<int>(buffer_to_send_[DIR_THETA]) << endl;
-                cout << "-> Dribbler: " << static_cast<int>(buffer_to_send_[DRIBBLER]) << endl;
-                cout << "-> Kick: " << static_cast<int>(buffer_to_send_[KICK]) << endl << endl;
-                serial_->send(buffer_to_send_);
-
                 buffer_to_send_ = vector<uint8_t>(9, 0);
-                message_.clear();
+                message_.serialize(buffer_to_send_);
+                serial_->send(buffer_to_send_);
+                
                 pkg_id_++;
                 compair_time = high_resolution_clock::now();
             }
