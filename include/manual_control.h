@@ -103,6 +103,11 @@ class ManualControl {
         */
         void run();
 
+        /*!
+        * \brief createMessage constructs the message_
+        */
+        void createMessage();
+
     public:
         ManualControl();
         ManualControl(int device_number, Parameters param, SerialSender *serial);

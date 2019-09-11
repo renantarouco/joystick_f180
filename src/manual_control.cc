@@ -79,17 +79,9 @@ void ManualControl::run() {
 
         if (axis_send || rotating_ || button_send || dribbling_ || kicking_) {
             if ((high_resolution_clock::now() - compair_time) >= frequency_) {
-                message_.setPkgId(pkg_id_);
-                message_.setMsgType(msg_type_);
-                message_.setRobotId(robot_id_);
-                message_.setVelocityX(linear_velocity_x_);
-                message_.setVelocityY(linear_velocity_y_);
-                message_.setDirectionX(direction_x_);
-                message_.setDirectionY(direction_y_);
-                message_.setVelocityTheta(angular_velocity_);
-                message_.setDirectionTheta(direction_theta_);
-                //cout << message_ << endl;
-                buffer_to_send_ = vector<uint8_t>(9, 0);
+                createMessage();
+                cout << message_ << endl;
+
                 message_.serialize(buffer_to_send_);
                 cout << "Testando Mensagem:" << endl;
                 cout << "-> Robot ID: " << static_cast<int>(buffer_to_send_[ROBOT_ID]) << endl;
@@ -102,6 +94,8 @@ void ManualControl::run() {
                 cout << "-> Dribbler: " << static_cast<int>(buffer_to_send_[DRIBBLER]) << endl;
                 cout << "-> Kick: " << static_cast<int>(buffer_to_send_[KICK]) << endl << endl;
                 serial_->send(buffer_to_send_);
+
+                buffer_to_send_ = vector<uint8_t>(9, 0);
                 message_.clear();
                 pkg_id_++;
                 compair_time = high_resolution_clock::now();
@@ -171,4 +165,16 @@ void ManualControl::calculateVelocity() {
 
     linear_velocity_x_ = static_cast<unsigned char>((int)(abs(axis_[AXIS_X]) * max_linear_velocity_ / max_axis_));
     linear_velocity_y_ = static_cast<unsigned char>((int)(abs(axis_[AXIS_Y]) * max_linear_velocity_ / max_axis_));
+}
+
+void ManualControl::createMessage() {
+    message_.setPkgId(pkg_id_);
+    message_.setMsgType(msg_type_);
+    message_.setRobotId(robot_id_);
+    message_.setVelocityX(linear_velocity_x_);
+    message_.setVelocityY(linear_velocity_y_);
+    message_.setDirectionX(direction_x_);
+    message_.setDirectionY(direction_y_);
+    message_.setVelocityTheta(angular_velocity_);
+    message_.setDirectionTheta(direction_theta_);
 }
