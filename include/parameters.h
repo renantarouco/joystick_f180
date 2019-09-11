@@ -27,6 +27,8 @@ class Parameters {
         int pass_power; //!<Robot pass strength
 
         int robot_id; //!<ID of the robot that will be controlled
+        int pkg_id; //!<Package id
+        int msg_type; //!<Type of the message
 
         std::string serial_port; //!<Address of the serial port that will be used
         int frequency; //!<Frequency in Hz of packet sending

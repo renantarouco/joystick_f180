@@ -3,7 +3,7 @@
 #ifndef JOYSTICK_MANUAL_CONTROL_H
 #define JOYSTICK_MANUAL_CONTROL_H
 
-#include "furgbol-core/io/serial_message.h"
+#include "furgbol-core/io/f180_serial_message.h"
 #include "furgbol-core/io/serial_sender.h"
 #include "parameters.h"
 
@@ -70,8 +70,11 @@ class ManualControl {
         duration<float> frequency_; //!<Variable to store the transmission frequency
 
         //Networking
-        SerialMessage message_; //!<Message to be sent
+        F180SerialMessage message_; //!<Message to be sent
         SerialSender *serial_; //!<Pointer to the serial communication thread
+        uint16_t pkg_id_; //!<Package id
+        uint8_t msg_type_; //!<Type of the message
+        vector<uint8_t> buffer_to_send_; //!<Buffer to be sent as message
 
         /*!
          * \brief calculateVelocity calculates the linear velocity of the robot based on the value offered by the axis vector

@@ -24,6 +24,7 @@ Parameters::Parameters() {
     std::cout << "Kick Power: " << kick_power << std::endl;
     std::cout << "Pass Power: " << pass_power << std::endl;
     std::cout << "-> Robot ID: " << robot_id << std::endl;
+    std::cout << "-> Message Type: " << msg_type << std::endl;
     std::cout << std::endl;
 }
 
@@ -47,6 +48,7 @@ void Parameters::readParameters() {
     
     serial_port = j["networking"]["serial_port"];
     frequency = j["networking"]["frequency"];
+    msg_type = j["networking"]["message_type"];
 }
 
 }
