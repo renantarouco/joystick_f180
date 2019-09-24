@@ -1,40 +1,39 @@
 // Copyright 2019 FURGBot
 
+
 #include "manual_control.h"
+
 
 ManualControl::ManualControl() : device_number_(-1), max_linear_velocity_(0), max_angular_velocity_(0), 
     running_(false), rotating_(false), dribbling_(false), kicking_(0), serial_(), robot_id_(0), pkg_id_(0),
-    msg_type_(0), buffer_to_send_(vector<uint8_t>(9, 0))
-{
-    axis_ = vector<short>(2, 0);
+    msg_type_(0), buffer_to_send_(vector<uint8_t>(9, 0)), axis_(vector<short>(2, 0)) {}
 
-    message_.setRobotId(robot_id_);
+
+ManualControl::~ManualControl() { this->stop(); }
+
+
+void ManualControl::init() {
+    lua_State *L = luaL_newstate();
+    luaL_openlibs(L);
+
+    int num_args, num_returns;
+
+    lua_pushcfunction(L, lua_kernel::joystick::newSerial);
+    lua_setglobal(L, "newSerial");
+    lua_pushcfunction(L, lua_kernel::joystick::f180::newJoystick);
+    lua_setglobal(L, "newJoystick");
+
+    luaL_dofile(L, "config.lua");
+
+    lua_close(L);
 }
 
-ManualControl::ManualControl(int device_number, Parameters param, SerialSender *serial) : 
-    device_number_(device_number), max_linear_velocity_(param.max_linear_velocity), 
-    frequency_(1.0/param.frequency), max_angular_velocity_(param.max_angular_velocity), 
-    running_(false), rotating_(false), dribbling_(false), kicking_(0), serial_(serial), 
-    robot_id_(param.robot_id), max_axis_(param.max_axis), min_axis_(param.min_axis), 
-    kick_times_(param.kick_times), dribbler_velocity_(param.dribbler_velocity), 
-    kick_power_(param.kick_power), pass_power_(param.pass_power), pkg_id_(0), msg_type_(param.msg_type),
-    buffer_to_send_(vector<uint8_t>(9, 0))
-{
-    joystick_ = new Joystick(device_number);
-
-    axis_ = vector<short>(2, 0);
-
-    message_.setRobotId(robot_id_);
-}
-
-ManualControl::~ManualControl() {
-    this->stop();
-}
 
 void ManualControl::start() {
     running_ = true;
     td_ = thread(&ManualControl::run, this);
 }
+
 
 void ManualControl::stop() {
     {
@@ -43,6 +42,7 @@ void ManualControl::stop() {
     }
     td_.join();
 }
+
 
 void ManualControl::run() {
     bool button_send = false;
@@ -98,6 +98,7 @@ void ManualControl::run() {
     message_.clear();
 }
 
+
 bool ManualControl::readEventButton() {
     switch (event_.number) {
         case A: //Low pass
@@ -136,15 +137,18 @@ bool ManualControl::readEventButton() {
     return event_.value;
 }
 
+
 void ManualControl::readEventAxis() {
     if (event_.number<axis_.size()) axis_[event_.number] = event_.value;
 }
+
 
 bool ManualControl::verifyVelocityAxis() {
     for (int i = 0; i < 2; i++)
         if(abs(axis_[i]) >= min_axis_) return true;
     return false;
 }
+
 
 void ManualControl::calculateVelocity() {
     if (axis_[AXIS_X] < 0) direction_x_ = 1;
@@ -156,6 +160,7 @@ void ManualControl::calculateVelocity() {
     linear_velocity_x_ = static_cast<unsigned char>((int)(abs(axis_[AXIS_X]) * max_linear_velocity_ / max_axis_));
     linear_velocity_y_ = static_cast<unsigned char>((int)(abs(axis_[AXIS_Y]) * max_linear_velocity_ / max_axis_));
 }
+
 
 void ManualControl::createMessage() {
     message_.setPkgId(pkg_id_);

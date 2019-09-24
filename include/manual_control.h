@@ -5,7 +5,7 @@
 
 #include "furgbol-core/io/f180_serial_message.h"
 #include "furgbol-core/io/serial_sender.h"
-#include "parameters.h"
+#include "lua_kernel.h"
 
 #include "joystick.hh"
 
@@ -80,29 +80,24 @@ class ManualControl {
          * \brief calculateVelocity calculates the linear velocity of the robot based on the value offered by the axis vector
          */
         void calculateVelocity();
-
         /*!
          * \brief readEventButton processes an event that is triggered by a button, checking what type of action to take 
          * \return boolean indicating whether or not to send data to the robot
          */
         bool readEventButton();
-
         /*!
         * \brief readEventAxis processes an event that is triggered by an analog, filling the axis vector
         */
         void readEventAxis();
-
         /*!
         * \brief verifyVelocityAxis checks if the values in the axis vector are sufficient to calculate the velocity
         * \return boolean indicating whether the data is relevant or not
         */
         bool verifyVelocityAxis();
-
         /*!
         * \brief run is the main loop to thread, passed by parameter to td
         */
         void run();
-
         /*!
         * \brief createMessage constructs the message_
         */
@@ -110,10 +105,16 @@ class ManualControl {
 
     public:
         ManualControl();
-        ManualControl(int device_number, Parameters param, SerialSender *serial);
-
         ~ManualControl();
 
+        /*!
+        * \brief init configures the joystick
+        */
+        void init();
+        /*!
+        * \brief repeat locks the execution
+        */
+        void repeat();
         /*!
         * \brief start sets the running flag to true and rebuilds thread td to restart the thread
         */

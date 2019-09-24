@@ -2,7 +2,6 @@
 
 #include "furgbol-core/io/serial_sender.h"
 #include "manual_control.h"
-#include "parameters.h"
 
 int main() {
     furgbol::parameters::Parameters param;
