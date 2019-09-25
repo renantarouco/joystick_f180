@@ -14,8 +14,6 @@ ManualControl::~ManualControl() { this->stop(); }
 
 void ManualControl::init() {
     lua_State *L = luaL_newstate();
-    luaL_openlibs(L);
-
     int num_args, num_returns;
 
     lua_pushcfunction(L, lua_kernel::joystick::newSerial);
@@ -23,9 +21,15 @@ void ManualControl::init() {
     lua_pushcfunction(L, lua_kernel::joystick::f180::newJoystick);
     lua_setglobal(L, "newJoystick");
 
-    luaL_dofile(L, "config.lua");
+    luaL_dofile(L, "../scripts/config.lua");
 
     lua_close(L);
+}
+
+
+void ManualControl::repeat() {
+    start();
+    while(1);
 }
 
 
