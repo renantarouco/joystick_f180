@@ -6,26 +6,39 @@
 
 ManualControl::ManualControl() : device_number_(-1), max_linear_velocity_(0), max_angular_velocity_(0), 
     running_(false), rotating_(false), dribbling_(false), kicking_(0), serial_(), robot_id_(0), pkg_id_(0),
-    msg_type_(0), buffer_to_send_(vector<uint8_t>(9, 0)), axis_(vector<short>(2, 0)) {}
+    msg_type_(0), buffer_to_send_(vector<uint8_t>(9, 0)), axis_(vector<short>(2, 0)), 
+    lua_state_(luaL_newstate()) {}
 
 
-ManualControl::~ManualControl() { this->stop(); }
+ManualControl::~ManualControl() { 
+    if (lua_state_ != NULL) lua_close(lua_state_);
+    this->stop();
+}
 
 
 void ManualControl::init() {
-    lua_State *L = luaL_newstate();
-    luaL_openlibs(L);
+    luaL_openlibs(lua_state_);
 
-    int num_args, num_returns;
+    lua_pushcfunction(lua_state_, lua_kernel::joystick::newSerial);
+    lua_setglobal(lua_state_, "newSerial");
+    lua_pushcfunction(lua_state_, lua_kernel::joystick::f180::newJoystick);
+    lua_setglobal(lua_state_, "newJoystick");
 
-    lua_pushcfunction(L, lua_kernel::joystick::newSerial);
-    lua_setglobal(L, "newSerial");
-    lua_pushcfunction(L, lua_kernel::joystick::f180::newJoystick);
-    lua_setglobal(L, "newJoystick");
+    verify_ = luaL_loadfile(L, "scripts/config.lua");
+    if (verify_ != LUA_OK) lua_kernel::printError(lua_state_);
+    else {
+        verify_ = lua_pcall(L, 0, 0, 0);
+        if (verify_ != LUA_OK) lua_kernel::printError(lua_state_); {
+            lua_getglobal(L, "startConfiguration");
+            verify_ = lua_pcall(L, 0, 0, 0);
+            if (verify_ != LUA_OK) lua_kernel::printError(lua_state_);
+        }
+    }
+}
 
-    luaL_dofile(L, "config.lua");
-
-    lua_close(L);
+void ManualControl::repeat() {
+    start();
+    while(1);
 }
 
 
