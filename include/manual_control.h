@@ -76,6 +76,10 @@ class ManualControl {
         uint8_t msg_type_; //!<Type of the message
         vector<uint8_t> buffer_to_send_; //!<Buffer to be sent as message
 
+        //Lua
+        lua_State *lua_state_;
+        int verify_;
+
         /*!
          * \brief calculateVelocity calculates the linear velocity of the robot based on the value offered by the axis vector
          */

@@ -10,14 +10,18 @@
 
 
 namespace lua_kernel {
+
+void printError(lua_State *lua_state_);
+
 namespace joystick {
 
-void newSerial(lua_State*);
+void newSerial(lua_State *lua_state_);
 
 namespace f180 {
-    void newJoystick(lua_State*);
-} // namespace f180
 
+void newJoystick(lua_State *lua_state_);
+
+} // namespace f180
 } // namespace joystick
 } // namespace lua_kernel
 
