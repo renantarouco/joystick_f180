@@ -15,8 +15,7 @@ include_directories("include"
 
 add_library(furgbol_joy
             "src/manual_control.cc"
-            "src/parameters.cc"
-            "src/kernel.cc")
+            "src/lua_kernel.cc")
 
 add_library(lua53 STATIC IMPORTED)
 

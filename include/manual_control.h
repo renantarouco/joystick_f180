@@ -19,7 +19,6 @@
 
 using namespace std;
 using namespace furgbol::io;
-using namespace furgbol::parameters;
 using namespace std::chrono;
 
 enum Axis{
@@ -47,7 +46,6 @@ class ManualControl {
         vector<short> axis_; //!<Vector holding joystick analog value
 
         //Control Variables
-        int robot_id_; //!<Variable that holds the id of the robot to be controlled
         bool rotating_; //!<Flag to indicate whether the spin button is pressed or not
         bool dribbling_; //!<Flag to indicate if the dribbler button is pressed or not
         int kicking_; //!<Variable to ensure that the robot will attempt to kick kick_times_ to facilitate kick control
@@ -59,6 +57,9 @@ class ManualControl {
         uint8_t direction_theta_; //!<Variable that keeps the direction of angular velocity
 
         //Parameters
+        std::string serial_port_name_;
+        uint8_t msg_type_; //!<Type of the message
+        int robot_id_; //!<Variable that holds the id of the robot to be controlled
         int max_linear_velocity_; //!<Maximum linear speed the robot can assume
         int max_angular_velocity_; //!<Maximum angular velocity the robot can assume
         int dribbler_velocity_; //!<Dribbler speed in pwm
@@ -73,7 +74,6 @@ class ManualControl {
         F180SerialMessage message_; //!<Message to be sent
         SerialSender *serial_; //!<Pointer to the serial communication thread
         uint16_t pkg_id_; //!<Package id
-        uint8_t msg_type_; //!<Type of the message
         vector<uint8_t> buffer_to_send_; //!<Buffer to be sent as message
 
         //Lua
@@ -127,6 +127,20 @@ class ManualControl {
         * \brief stop hangs with mutex, set running flag to false and join in thread td
         */
         void stop();
+
+        //Setters
+        void setSerialPortName(std::string serial_port_name);
+        void setMsgType(int msg_type);
+        void setRobotId(int robot_id);
+        void setCommunicationFrequency(int communication_frequency);
+        void setMinAxisValue(int min_axis_value);
+        void setMaxAxisValue(int max_axis_value);
+        void setMaxLinearVelocity(int max_linear_velocity);
+        void setMaxAngularVelocity(int max_angular_velocity);
+        void setDribblerVelocity(int dribbler_velocity);
+        void setKickPower(int kick_power);
+        void setKickTimes(int kick_times);
+        void setPassPower(int pass_power);
 };
 
 #endif // JOYSTICK_MANUAL_CONTROL_H

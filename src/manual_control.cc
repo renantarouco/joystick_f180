@@ -17,40 +17,23 @@ ManualControl::~ManualControl() {
 
 
 void ManualControl::init() {
-<<<<<<< HEAD
-    lua_State *L = luaL_newstate();
-    int num_args, num_returns;
-
-    lua_pushcfunction(L, lua_kernel::joystick::newSerial);
-    lua_setglobal(L, "newSerial");
-    lua_pushcfunction(L, lua_kernel::joystick::f180::newJoystick);
-    lua_setglobal(L, "newJoystick");
-
-    luaL_dofile(L, "../scripts/config.lua");
-=======
     luaL_openlibs(lua_state_);
 
-    lua_pushcfunction(lua_state_, lua_kernel::joystick::newSerial);
+    lua_pushcfunction(lua_state_, lua_CFunction(lua_kernel::joystick::newSerial));
     lua_setglobal(lua_state_, "newSerial");
-    lua_pushcfunction(lua_state_, lua_kernel::joystick::f180::newJoystick);
+    lua_pushcfunction(lua_state_, lua_CFunction(lua_kernel::joystick::f180::newJoystick));
     lua_setglobal(lua_state_, "newJoystick");
 
-    verify_ = luaL_loadfile(L, "scripts/config.lua");
+    verify_ = luaL_loadfile(lua_state_, "scripts/config.lua");
     if (verify_ != LUA_OK) lua_kernel::printError(lua_state_);
     else {
-        verify_ = lua_pcall(L, 0, 0, 0);
+        verify_ = lua_pcall(lua_state_, 0, 0, 0);
         if (verify_ != LUA_OK) lua_kernel::printError(lua_state_); {
-            lua_getglobal(L, "startConfiguration");
-            verify_ = lua_pcall(L, 0, 0, 0);
+            lua_getglobal(lua_state_, "startConfiguration");
+            verify_ = lua_pcall(lua_state_, 0, 0, 0);
             if (verify_ != LUA_OK) lua_kernel::printError(lua_state_);
         }
     }
-}
->>>>>>> 9adbe0a58a0ba24de7da96c880287be5f41ca597
-
-void ManualControl::repeat() {
-    start();
-    while(1);
 }
 
 
@@ -204,3 +187,27 @@ void ManualControl::createMessage() {
     message_.setVelocityTheta(angular_velocity_);
     message_.setDirectionTheta(direction_theta_);
 }
+
+void ManualControl::setCommunicationFrequency(int communication_frequency) { frequency_ = duration<float>(1.0/communication_frequency); }
+
+void ManualControl::setDribblerVelocity(int dribbler_velocity) { dribbler_velocity_ = dribbler_velocity; }
+
+void ManualControl::setKickPower(int kick_power) { kick_power_ = kick_power; }
+
+void ManualControl::setKickTimes(int kick_times) { kick_times_ = kick_times; }
+
+void ManualControl::setMaxAngularVelocity(int max_angular_velocity) { max_angular_velocity_ = max_angular_velocity; }
+
+void ManualControl::setMaxAxisValue(int max_axis_value) { max_axis_ = max_axis_value; }
+
+void ManualControl::setMaxLinearVelocity(int max_linear_velocity) { max_linear_velocity_ = max_linear_velocity; }
+
+void ManualControl::setMinAxisValue(int min_axis_value) { min_axis_ = min_axis_value; }
+
+void ManualControl::setMsgType(int msg_type) { msg_type_ = msg_type; }
+
+void ManualControl::setPassPower(int pass_power) { pass_power_ = pass_power; }
+
+void ManualControl::setRobotId(int robot_id) { robot_id_ = robot_id; }
+
+void ManualControl::setSerialPortName(std::string serial_port_name) { serial_port_name_ = serial_port_name; }

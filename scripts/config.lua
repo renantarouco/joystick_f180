@@ -4,9 +4,9 @@ function startConfiguration()
     })
 
     newJoystick({
-        communication_frequency = 100,
         message_type = 0,
         robot_id = 0,
+        communication_frequency = 100,
         min_axis_value = 10000,
         max_axis_value = 32767,
         max_linear_velocity = 50,

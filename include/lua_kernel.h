@@ -15,11 +15,11 @@ void printError(lua_State *lua_state_);
 
 namespace joystick {
 
-void newSerial(lua_State *lua_state_);
+void newSerial(lua_State *lua_state_, ManualControl joy);
 
 namespace f180 {
 
-void newJoystick(lua_State *lua_state_);
+void newJoystick(lua_State *lua_state_, ManualControl joy);
 
 } // namespace f180
 } // namespace joystick
