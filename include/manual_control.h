@@ -129,7 +129,7 @@ class ManualControl {
         void stop();
 
         //Setters
-        void setSerialPortName(std::string serial_port_name);
+        void setSerialPort(std::string serial_port_name);
         void setMsgType(int msg_type);
         void setRobotId(int robot_id);
         void setCommunicationFrequency(int communication_frequency);

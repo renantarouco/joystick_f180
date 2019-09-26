@@ -211,4 +211,4 @@ void ManualControl::setPassPower(int pass_power) { pass_power_ = pass_power; }
 
 void ManualControl::setRobotId(int robot_id) { robot_id_ = robot_id; }
 
-void ManualControl::setSerialPortName(std::string serial_port_name) { serial_port_name_ = serial_port_name; }
+void ManualControl::setSerialPort(std::string serial_port_name) { serial_ = new SerialSender(serial_port_name); }

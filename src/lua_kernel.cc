@@ -13,7 +13,7 @@ void printError(lua_State *lua_state) {
 void joystick::newSerial(lua_State *lua_state, ManualControl joy) {
     lua_pushstring(lua_state, "serial_port");
     lua_gettable(lua_state, 1);
-    joy.setSerialPortName(lua_tostring(lua_state, -1));
+    joy.setSerialPort(lua_tostring(lua_state, -1));
 }
 
 void joystick::f180::newJoystick(lua_State *lua_state, ManualControl joy) {
