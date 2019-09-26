@@ -31,4 +31,5 @@ target_link_libraries(joystick_f180
                     furgbol_joy
                     lua53
                     libjoystick.a
-                    ${Boost_LIBRARIES})
+                    ${Boost_LIBRARIES}
+                    ${CMAKE_DL_LIBS})

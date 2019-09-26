@@ -1,29 +1,22 @@
 // Copyright 2019 FURGBot
 
 #include "lua_kernel.h"
-#include "manual_control.h"
 
 namespace lua_kernel {
 
-void printError(lua_State *lua_state_) {
-    const char *message = lua_tostring(lua_state_, -1);
+void printError(lua_State *lua_state) {
+    const char *message = lua_tostring(lua_state, -1);
     printf("\n\n**[ERROR]: %s\n", message);
-    lua_pop(lua_state_, -1);
+    lua_pop(lua_state, -1);
 }
 
-namespace joystick {
-
-
-void newSerial(lua_State *lua_state, ManualControl joy) {
+void joystick::newSerial(lua_State *lua_state, ManualControl joy) {
     lua_pushstring(lua_state, "serial_port");
     lua_gettable(lua_state, 1);
     joy.setSerialPortName(lua_tostring(lua_state, -1));
 }
 
-
-namespace f180 {
-
-void newJoystick(lua_State *lua_state, ManualControl joy) {
+void joystick::f180::newJoystick(lua_State *lua_state, ManualControl joy) {
     lua_pushstring(lua_state, "message_type");
     lua_gettable(lua_state, 1);
     joy.setMsgType((int)lua_tonumber(lua_state, -1));
@@ -69,6 +62,4 @@ void newJoystick(lua_State *lua_state, ManualControl joy) {
     joy.setPassPower((int)lua_tonumber(lua_state, -1));
 }
 
-} // namespace f180
-} // namespace joystick
 } // namespace lua_kernel

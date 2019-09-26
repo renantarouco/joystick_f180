@@ -2,6 +2,7 @@
 
 
 #include "manual_control.h"
+#include "lua_kernel.h"
 
 
 ManualControl::ManualControl() : device_number_(-1), max_linear_velocity_(0), max_angular_velocity_(0), 

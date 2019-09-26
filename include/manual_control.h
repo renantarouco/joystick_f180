@@ -5,9 +5,9 @@
 
 #include "furgbol-core/io/f180_serial_message.h"
 #include "furgbol-core/io/serial_sender.h"
-#include "lua_kernel.h"
 
 #include "joystick.hh"
+#include "lua.hpp"
 
 #include <iostream>
 #include <string>
