@@ -7,12 +7,29 @@ find_package(Boost REQUIRED COMPONENTS system)
 
 link_directories(${CMAKE_SOURCE_DIR}/lib/joystick-master)
 
-include_directories("include" "lib/joystick-master" "../furgbol-core/include" ${Boost_INCLUDE_DIRS})
+include_directories("include" 
+                    "lib/joystick-master"
+                    "lib/lua/include"
+                    "../furgbol-core/include"
+                    ${Boost_INCLUDE_DIRS})
 
-add_library(furgbol_joy "src/manual_control.cc" "src/parameters.cc" "include/json.hpp")
+add_library(furgbol_joy
+            "src/manual_control.cc"
+            "src/lua_kernel.cc")
 
-target_link_libraries(furgbol_joy ${Boost_SYSTEM_LIBRARY} "/home/miguel/Workspaces/furgbot/furgbol-core/lib/libfurgbol-core-io.a")
+add_library(lua53 STATIC IMPORTED)
+
+set_target_properties(lua53 PROPERTIES IMPORTED_LOCATION "${CMAKE_SOURCE_DIR}/lib/lua/liblua53.a")
+
+target_link_libraries(furgbol_joy
+                    "${CMAKE_SOURCE_DIR}/../furgbol-core/lib/libfurgbol-core-io.a"
+                    ${Boost_SYSTEM_LIBRARY})
 
 add_executable(joystick_f180 "src/main.cpp")
 
-target_link_libraries(joystick_f180 furgbol_joy ${Boost_LIBRARIES} libjoystick.a)
+target_link_libraries(joystick_f180
+                    furgbol_joy
+                    lua53
+                    libjoystick.a
+                    ${Boost_LIBRARIES}
+                    ${CMAKE_DL_LIBS})
