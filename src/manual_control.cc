@@ -7,7 +7,7 @@
 
 ManualControl::ManualControl() : device_number_(-1), max_linear_velocity_(0), max_angular_velocity_(0), 
     running_(false), rotating_(false), dribbling_(false), kicking_(0), serial_(), robot_id_(0), pkg_id_(0),
-    msg_type_(0), buffer_to_send_(vector<uint8_t>(9, 0)), axis_(vector<short>(2, 0)), 
+    msg_type_(0), buffer_to_send_(std::vector<uint8_t>(9, 0)), axis_(std::vector<short>(2, 0)), 
     lua_state_(luaL_newstate()) {}
 
 
@@ -25,14 +25,11 @@ void ManualControl::init() {
     lua_pushcfunction(lua_state_, lua_CFunction(lua_kernel::joystick::f180::newJoystick));
     lua_setglobal(lua_state_, "newJoystick");
 
-    verify_ = luaL_loadfile(lua_state_, "scripts/config.lua");
-    if (verify_ != LUA_OK) lua_kernel::printError(lua_state_);
+    if (luaL_loadfile(lua_state_, "scripts/config.lua") != LUA_OK) lua_kernel::printError(lua_state_);
     else {
-        verify_ = lua_pcall(lua_state_, 0, 0, 0);
-        if (verify_ != LUA_OK) lua_kernel::printError(lua_state_); {
+        if (lua_pcall(lua_state_, 0, 0, 0) != LUA_OK) lua_kernel::printError(lua_state_); {
             lua_getglobal(lua_state_, "startConfiguration");
-            verify_ = lua_pcall(lua_state_, 0, 0, 0);
-            if (verify_ != LUA_OK) lua_kernel::printError(lua_state_);
+            if (lua_pcall(lua_state_, 0, 0, 0) != LUA_OK) lua_kernel::printError(lua_state_);
         }
     }
 }
@@ -46,13 +43,13 @@ void ManualControl::repeat() {
 
 void ManualControl::start() {
     running_ = true;
-    td_ = thread(&ManualControl::run, this);
+    td_ = std::thread(&ManualControl::run, this);
 }
 
 
 void ManualControl::stop() {
     {
-        lock_guard<mutex> lock(mu_);
+        std::lock_guard<std::mutex> lock(mu_);
         running_ = false;
     }
     td_.join();
@@ -63,9 +60,9 @@ void ManualControl::run() {
     bool button_send = false;
     bool axis_send = false;
     
-    system_clock::time_point compair_time = high_resolution_clock::now();
+    std::chrono::system_clock::time_point compair_time = std::chrono::high_resolution_clock::now();
 
-    if (!joystick_->isFound()) cout << "Falha ao abrir o controle." << endl;
+    if (!joystick_->isFound()) std::cout << "Falha ao abrir o controle." << std::endl;
 
     while (running_) {
         if (joystick_->sample(&event_)) {
@@ -78,32 +75,31 @@ void ManualControl::run() {
         axis_send = verifyVelocityAxis();
 
         if (kicking_ >= kick_times_) {
-            kicking_ = 0;
-            message_.setKick(0);
+            kicking_ = NONE;
             button_send = true;
         }
 
         if (axis_send) calculateVelocity();
         else {
-            linear_velocity_x_ = 0.0;
-            linear_velocity_y_ = 0.0;
+            linear_velocity_x_ = 0;
+            linear_velocity_y_ = 0;
         }
 
         if (abs(axis_[AXIS_X]) < min_axis_) axis_[AXIS_X] = 0;
         if (abs(axis_[AXIS_Y]) < min_axis_) axis_[AXIS_Y] = 0;
 
         if (axis_send || rotating_ || button_send || dribbling_ || kicking_) {
-            if ((high_resolution_clock::now() - compair_time) >= frequency_) {
+            if ((std::chrono::high_resolution_clock::now() - compair_time) >= frequency_) {
                 message_.clear();
                 createMessage();
-                cout << message_ << endl;
+                std::cout << message_ << std::endl;
 
-                buffer_to_send_ = vector<uint8_t>(9, 0);
+                buffer_to_send_ = std::vector<uint8_t>(9, 0);
                 message_.serialize(buffer_to_send_);
                 serial_->send(buffer_to_send_);
                 
                 pkg_id_++;
-                compair_time = high_resolution_clock::now();
+                compair_time = std::chrono::high_resolution_clock::now();
             }
         }
 
@@ -117,33 +113,26 @@ void ManualControl::run() {
 bool ManualControl::readEventButton() {
     switch (event_.number) {
         case A: //Low pass
-            if (event_.value) {
-                message_.setKick(pass_power_);
-                kicking_ = 1;
-            }
+            if (event_.value) kicking_ = PASS;
             break;
         case X: //Low kick
-            if (event_.value) {
-                message_.setKick(kick_power_);
-                kicking_ = 1;
-            }
+            if (event_.value) kicking_ = KICK;
             break;
         case LB: //Dribbler
-            if (event_.value) message_.setDribbler(dribbler_velocity_);
-            else message_.setDribbler(0);
-            dribbling_ = event_.value;
+            if (event_.value) dribbling_ = event_.value;
+            else dribbling_ = 0;
             break;
         case LS: //Rotate clockwise
             if (event_.value) angular_velocity_ = static_cast<unsigned char>(max_angular_velocity_);
-            else angular_velocity_ = 0.0;
+            else angular_velocity_ = 0;
             rotating_ = event_.value;
-            direction_theta_ = 1;
+            direction_theta_ = NEGATIVE;
             break;
         case RS: //Rotate counterclockwise
             if(event_.value) angular_velocity_ = static_cast<unsigned char>(max_angular_velocity_);
-            else angular_velocity_ = 0.0;
+            else angular_velocity_ = 0;
             rotating_ = event_.value;
-            direction_theta_ = 3;
+            direction_theta_ = POSITIVE;
             break;
         default:
             return false;
@@ -167,10 +156,10 @@ bool ManualControl::verifyVelocityAxis() {
 
 void ManualControl::calculateVelocity() {
     if (axis_[AXIS_X] < 0) direction_x_ = 1;
-    else direction_x_ = 3;
+    else direction_x_ = POSITIVE;
 
     if (axis_[AXIS_Y] < 0) direction_y_ = 3;
-    else direction_y_ = 1;
+    else direction_y_ = NEGATIVE;
 
     linear_velocity_x_ = static_cast<unsigned char>((int)(abs(axis_[AXIS_X]) * max_linear_velocity_ / max_axis_));
     linear_velocity_y_ = static_cast<unsigned char>((int)(abs(axis_[AXIS_Y]) * max_linear_velocity_ / max_axis_));
@@ -187,9 +176,21 @@ void ManualControl::createMessage() {
     message_.setDirectionY(direction_y_);
     message_.setVelocityTheta(angular_velocity_);
     message_.setDirectionTheta(direction_theta_);
+
+    if (dribbling_) message_.setDribbler(dribbler_velocity_);
+    else message_.setDribbler(0);
+
+    switch (kicking_) {
+        case NONE:
+            message_.setKick(NONE);
+        case PASS:
+            message_.setKick(pass_power_);
+        case KICK:
+            message_.setKick(kick_power_);
+    }
 }
 
-void ManualControl::setCommunicationFrequency(int communication_frequency) { frequency_ = duration<float>(1.0/communication_frequency); }
+void ManualControl::setCommunicationFrequency(int communication_frequency) { frequency_ = std::chrono::duration<float>(1.0/communication_frequency); }
 
 void ManualControl::setDribblerVelocity(int dribbler_velocity) { dribbler_velocity_ = dribbler_velocity; }
 
@@ -211,4 +212,4 @@ void ManualControl::setPassPower(int pass_power) { pass_power_ = pass_power; }
 
 void ManualControl::setRobotId(int robot_id) { robot_id_ = robot_id; }
 
-void ManualControl::setSerialPort(std::string serial_port_name) { serial_ = new SerialSender(serial_port_name); }
+void ManualControl::setSerialPort(std::string serial_port_name) { serial_ = new furgbol::io::SerialSender(serial_port_name); }

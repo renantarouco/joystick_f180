@@ -13,7 +13,7 @@ function startConfiguration()
         max_angular_velocity = 90,
         dribbler_velocity = 127,
         kick_power = 127,
-        kick_times = 127,
+        kick_times = 10,
         pass_power = 50
     })
 end

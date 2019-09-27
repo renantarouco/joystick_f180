@@ -17,9 +17,6 @@
 #include <cstdio>
 #include <chrono>
 
-using namespace std;
-using namespace furgbol::io;
-using namespace std::chrono;
 
 enum Axis{
     AXIS_X, AXIS_Y
@@ -29,6 +26,14 @@ enum Buttons {
     A = 0, X = 2, LB = 4, LS = 11, RS = 12
 };
 
+enum Directions {
+    NEGATIVE = 1, POSITIVE = 3
+};
+
+enum KickType {
+    NONE, PASS, KICK
+};
+
 /*!
  * \brief The ManualControl class manages a thread to read the joystick, mount the serial package, and add to the SerialCommunicator thread submission list
  */
@@ -36,14 +41,14 @@ class ManualControl {
     private:
         //Thread Variables
         bool running_; //!<Thread Execution Control Flag
-        thread td_; //!<Class Thread
-        mutex mu_; //!<Mutex for writing on flag running
+        std::thread td_; //!<Class Thread
+        std::mutex mu_; //!<Mutex for writing on flag running
 
         //Joystick Variables
         int device_number_; //!<Joystick number used by thread
         Joystick *joystick_; //!<Joystick class object to read the file where the joystick writes its data
         JoystickEvent event_; //!<JoystickEvent class object to check for joystick events that should be processed
-        vector<short> axis_; //!<Vector holding joystick analog value
+        std::vector<short> axis_; //!<Vector holding joystick analog value
 
         //Control Variables
         bool rotating_; //!<Flag to indicate whether the spin button is pressed or not
@@ -55,9 +60,9 @@ class ManualControl {
         uint8_t direction_x_; //!<Variable that keeps the direction of linear velocity in x axis
         uint8_t direction_y_; //!<Variable that keeps the linear velocity direction in y axis
         uint8_t direction_theta_; //!<Variable that keeps the direction of angular velocity
+        int kick_type_; //!<Variable that stores kick type
 
         //Parameters
-        std::string serial_port_name_;
         uint8_t msg_type_; //!<Type of the message
         int robot_id_; //!<Variable that holds the id of the robot to be controlled
         int max_linear_velocity_; //!<Maximum linear speed the robot can assume
@@ -68,17 +73,16 @@ class ManualControl {
         int max_axis_; //!<Variable to store the maximum value read by the axis
         int min_axis_; //!<Variable to store the minimum value read by the axis
         int kick_times_; //!<Variable to store the number of times the robot will try to kick
-        duration<float> frequency_; //!<Variable to store the transmission frequency
+        std::chrono::duration<float> frequency_; //!<Variable to store the transmission frequency
 
         //Networking
-        F180SerialMessage message_; //!<Message to be sent
-        SerialSender *serial_; //!<Pointer to the serial communication thread
+        furgbol::io::F180SerialMessage message_; //!<Message to be sent
+        furgbol::io::SerialSender *serial_; //!<Pointer to the serial communication thread
         uint16_t pkg_id_; //!<Package id
-        vector<uint8_t> buffer_to_send_; //!<Buffer to be sent as message
+        std::vector<uint8_t> buffer_to_send_; //!<Buffer to be sent as message
 
         //Lua
-        lua_State *lua_state_;
-        int verify_;
+        lua_State *lua_state_; //!<Lua state object
 
         /*!
          * \brief calculateVelocity calculates the linear velocity of the robot based on the value offered by the axis vector
