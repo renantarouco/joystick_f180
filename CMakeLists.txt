@@ -22,7 +22,7 @@ add_library(lua53 STATIC IMPORTED)
 set_target_properties(lua53 PROPERTIES IMPORTED_LOCATION "${CMAKE_SOURCE_DIR}/lib/lua/liblua53.a")
 
 target_link_libraries(furgbol_joy
-                    "/home/miguel/Workspaces/furgbot/furgbol-core/lib/libfurgbol-core-io.a"
+                    "${CMAKE_SOURCE_DIR}/../furgbol-core/lib/libfurgbol-core-io.a"
                     ${Boost_SYSTEM_LIBRARY})
 
 add_executable(joystick_f180 "src/main.cpp")
