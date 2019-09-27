@@ -1,9 +1,7 @@
 // Copyright 2019 FURGBot
-
-#include "manual_control.h"
+#include "system.h"
 
 int main() {
-    ManualControl joystick;
-    joystick.init();
-    joystick.repeat();
+    std::shared_ptr<furgbol::System> system = furgbol::System::instance();
+    system->init();
 }

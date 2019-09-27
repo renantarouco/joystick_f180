@@ -14,8 +14,8 @@ include_directories("include"
                     ${Boost_INCLUDE_DIRS})
 
 add_library(furgbol_joy
-            "src/manual_control.cc"
-            "src/lua_kernel.cc")
+            "src/lua_kernel.cc"
+            "src/system.cc")
 
 add_library(lua53 STATIC IMPORTED)
 
